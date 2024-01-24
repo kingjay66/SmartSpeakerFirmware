@@ -1,2 +1,6 @@
+build/
+
 .clangd
+.clang-tidy
+.clang-format
 compile_commands.json
