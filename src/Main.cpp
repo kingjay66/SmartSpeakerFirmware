@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <thread>
 
 #ifdef FB_EN
     #define SDL_WINDOW_TYPE SDL_WINDOW_FULLSCREEN
@@ -57,17 +58,23 @@ int sdl_test()
     return EXIT_SUCCESS;
 }
 
-void rest_api_test()
+int rest_api_test()
 {
-    AuthRequest req = {.username = "tim", .password = "password"};
-    NetworkService.authLogin(req, [](RequestError* err, AuthResponse& response) {
-        if (err != nullptr)
+    AuthRequest req = {
+        .username = "tim",
+        .email = "email",
+        .password = "password",
+    };
+    NetworkService.authLogin(req, [](RequestError& err, AuthResponse& response) {
+        if (err.error != "")
         {
-            std::cerr << err->error << std::endl;
-            return;
+            std::cerr << err.error << std::endl;
         }
         std::cout << response.token << std::endl;
     });
+    while (true)
+    {};
+    return EXIT_SUCCESS;
 }
 
 int main()

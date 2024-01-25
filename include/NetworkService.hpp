@@ -12,12 +12,12 @@
     #ifndef TESTING
         #define TESTING
     #endif  // TESTING
-    #define BACKEND_SERVER_ADDR "http://127.0.0.1:8080/api/"
+    #define BACKEND_SERVER_ADDR "http://127.0.0.1:8080/"
 #endif  // PRODUCTION
 
 struct RequestError
 {
-    const std::string error;
+    std::string error;
 };
 
 struct AuthRequest
@@ -47,27 +47,26 @@ class NetworkServiceClass
   public:
     void authRegister(
         AuthRequest req,
-        std::function<void(RequestError* err, AuthResponse& response)> callback);
+        std::function<void(RequestError& err, AuthResponse& response)> callback);
     void authLogin(
         AuthRequest req,
-        std::function<void(RequestError* err, AuthResponse& response)> callback);
+        std::function<void(RequestError& err, AuthResponse& response)> callback);
 
     void userGetCurrentUserInfo(
         User& user,
-        std::function<void(RequestError* err, User& user)> callback);
+        std::function<void(RequestError& err, User& user)> callback);
     void userUpdateCurrentUserInfo(
         User& user,
-        std::function<void(RequestError* err, User& user)> callback);
+        std::function<void(RequestError& err, User& user)> callback);
 
     void createNewSpeaker(
         Speaker& speaker,
-        std::function<void(RequestError* err, Speaker& speaker)> callback);
+        std::function<void(RequestError& err, Speaker& speaker)> callback);
     void updateSpeaker(
         Speaker& speaker,
-        std::function<void(RequestError* err, Speaker& speaker)> &callback);
+        std::function<void(RequestError& err, Speaker& speaker)>& callback);
     void deleteSpeaker(Speaker& speaker,
-                       std::function<void(RequestError* err)> callback);
+                       std::function<void(RequestError& err)> callback);
 };
 
 extern NetworkServiceClass NetworkService;
-
