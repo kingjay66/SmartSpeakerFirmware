@@ -54,7 +54,7 @@ void getRequest(
         struct curl_slist* headers = nullptr;
         headers = curl_slist_append(headers, "Content-Type: application/json");
 
-        if (token.c_str() != nullptr && token != "")
+        if (!token.empty())
         {
             std::string authHeader = "Authorization: Bearer " + token;
             headers = curl_slist_append(headers, authHeader.c_str());
@@ -78,7 +78,7 @@ void getRequest(
             callback(err, nullptr);
             return;
         }
-        if (readBuffer == "")
+        if (readBuffer.empty())
         {
             err = REQUEST_ERR_NO_JSON;
             callback(err, nullptr);
@@ -117,7 +117,7 @@ void putRequest(
         struct curl_slist* headers = nullptr;
         headers = curl_slist_append(headers, "Content-Type: application/json");
 
-        if (token.c_str() != nullptr && token != "")
+        if (!token.empty())
         {
             std::string authHeader = "Authorization: Bearer " + token;
             headers = curl_slist_append(headers, authHeader.c_str());
@@ -141,7 +141,7 @@ void putRequest(
             callback(err, nullptr);
             return;
         }
-        if (readBuffer == "")
+        if (readBuffer.empty())
         {
             err = REQUEST_ERR_NO_JSON;
             callback(err, nullptr);
@@ -179,7 +179,7 @@ void postRequest(
         struct curl_slist* headers = nullptr;
         headers = curl_slist_append(headers, "Content-Type: application/json");
 
-        if (token.c_str() != nullptr && token != "")
+        if (!token.empty())
         {
             std::string authHeader = "Authorization: Bearer " + token;
             headers = curl_slist_append(headers, authHeader.c_str());
@@ -203,7 +203,7 @@ void postRequest(
             callback(err, nullptr);
             return;
         }
-        if (readBuffer == "")
+        if (readBuffer.empty())
         {
             err = REQUEST_ERR_NO_JSON;
             callback(err, nullptr);
@@ -236,7 +236,7 @@ void deleteRequest(
         struct curl_slist* headers = nullptr;
         headers = curl_slist_append(headers, "Content-Type: application/json");
 
-        if (token.c_str() != nullptr && token != "")
+        if (!token.empty())
         {
             std::string authHeader = "Authorization: Bearer " + token;
             headers = curl_slist_append(headers, authHeader.c_str());
@@ -260,7 +260,7 @@ void deleteRequest(
             callback(err, nullptr);
             return;
         }
-        if (readBuffer == "")
+        if (readBuffer.empty())
         {
             err = REQUEST_ERR_NO_JSON;
             callback(err, nullptr);
@@ -454,7 +454,7 @@ void NetworkServiceClass::deleteSpeaker(
             return;
         }
         const std::string url = std::string(BACKEND_SERVER_ADDR) + "speakers/" + speaker.id;
-        deleteRequest(this->token, url, [&callback](RequestError err, const json&  /*jsonResponse*/) {
+        deleteRequest(this->token, url, [&callback](RequestError err, const json& /*jsonResponse*/) {
             callback(err);
         });
     }

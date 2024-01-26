@@ -1,7 +1,6 @@
 #include <NetworkService.hpp>
 #include <SDL2/SDL.h>
 #include <User.hpp>
-#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <thread>
@@ -66,31 +65,31 @@ int rest_api_test()
         .password = "password",
     };
     NetworkService.authRegister(req, [=](RequestError err, AuthResponse& response) {
-        if (err != REQUEST_ERR_OK) 
+        if (err != REQUEST_ERR_OK)
         {
-            std::cerr << err << std::endl;
+            std::cerr << err << '\n';
             return;
         }
-        std::cout << response.token << std::endl;
+        std::cout << response.token << '\n';
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     NetworkService.authLogin(req, [=](RequestError err, AuthResponse& response) {
         if (err != REQUEST_ERR_OK)
         {
-            std::cerr << err << std::endl;
+            std::cerr << err << '\n';
             return;
         }
-        std::cout << response.token << std::endl;
+        std::cout << response.token << '\n';
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     User user;
     NetworkService.userGetCurrentUserInfo(user, [=](RequestError err, User& user) {
-        if (err != REQUEST_ERR_OK) 
+        if (err != REQUEST_ERR_OK)
         {
-            std::cerr << err << std::endl;
+            std::cerr << err << '\n';
             return;
         }
-        std::cout << user.id << std::endl;
+        std::cout << user.id << '\n';
     });
     while (true)
     {};
