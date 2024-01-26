@@ -56,9 +56,14 @@ class NetworkServiceClass
     std::string loadToken();
     void saveToken();
 
-    NetworkServiceClass() = default;
-
   public:
+    NetworkServiceClass() = default;
+    NetworkServiceClass(const NetworkServiceClass&) = default;
+    NetworkServiceClass(NetworkServiceClass&&) = default;
+    NetworkServiceClass& operator=(const NetworkServiceClass&) = default;
+    NetworkServiceClass& operator=(NetworkServiceClass&&) = delete;
+    ~NetworkServiceClass();
+
     void authRegister(
         AuthRequest req,
         std::function<void(RequestError err, AuthResponse& response)> callback);
@@ -83,4 +88,5 @@ class NetworkServiceClass
                        std::function<void(RequestError err)>& callback);
 };
 
-constexpr extern NetworkServiceClass NetworkService();
+extern NetworkServiceClass NetworkService;
+

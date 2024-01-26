@@ -7,6 +7,8 @@
 
 using json = nlohmann::json;
 
+NetworkServiceClass NetworkService = NetworkServiceClass();
+
 void from_json_to_user(const json& json, User& user)
 {
     json.at("id").get_to(user.id);
@@ -271,6 +273,8 @@ void deleteRequest(
 
     reqThread.detach();
 }
+
+NetworkServiceClass::~NetworkServiceClass() = default;
 
 void NetworkServiceClass::authRegister(
     AuthRequest req,
