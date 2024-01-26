@@ -7,8 +7,6 @@
 
 using json = nlohmann::json;
 
-NetworkServiceClass NetworkService;
-
 void from_json_to_user(const json& json, User& user)
 {
     json.at("id").get_to(user.id);
