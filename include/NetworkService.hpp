@@ -15,28 +15,33 @@
     #define BACKEND_SERVER_ADDR "http://127.0.0.1:8080/"
 #endif  // PRODUCTION
 
-struct RequestError
-{
-    std::string error;
-};
+#define REQUEST_ERR_OK 200
+
+#define REQUEST_ERR_CURL_INIT -1
+#define REQUEST_ERR_CURL_PERFORM -2
+#define REQUEST_ERR_NO_JSON -3
+#define REQUEST_ERR_OBJ_NOID -4
+#define REQUEST_ERR_JSON_PARSE -5
+
+#define RequestError long
 
 struct AuthRequest
 {
-    const char* username;
-    const char* email;
-    const char* password;
+    const std::string username;
+    const std::string email;
+    const std::string password;
 };
 
 struct UserUpdateRequest
 {
-    const char* name;
-    const char* username;
-    const char* email;
+    const std::string name;
+    const std::string username;
+    const std::string email;
 };
 
 struct AuthResponse
 {
-    const char* token;
+    std::string token;
 };
 
 class NetworkServiceClass

@@ -1,7 +1,6 @@
 #include <NetworkService.hpp>
 
 #include <curl/curl.h>
-#include <iostream>
 #include <json.hpp>
 #include <string>
 #include <thread>
@@ -13,7 +12,10 @@ NetworkServiceClass NetworkService;
 void from_json_to_user(const json& json, User& user)
 {
     json.at("id").get_to(user.id);
-    json.at("name").get_to(user.name);
+    if (json.contains("name"))
+    {
+        json.at("name").get_to(user.name);
+    }
     json.at("email").get_to(user.email);
     json.at("username").get_to(user.username);
     json.at("userType").get_to(user.userType);
@@ -22,24 +24,27 @@ void from_json_to_user(const json& json, User& user)
 void from_json_to_speaker(const json& json, Speaker& speaker)
 {
     json.at("id").get_to(speaker.id);
-    json.at("name").get_to(speaker.name);
+    if (json.contains("name"))
+    {
+        json.at("name").get_to(speaker.name);
+    }
 }
 
 static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
+    (static_cast<std::string*>(userp))->append(static_cast<char*>(contents), size * nmemb);
     return size * nmemb;
 }
 void getRequest(
     const std::string& token,
     const std::string& url,
-    std::function<void(RequestError& err, json jsonResponse)> callback)
+    const std::function<void(RequestError& err, json jsonResponse)>& callback)
 {
     std::thread reqThread([=]() {
         CURL* curl = curl_easy_init();
         if (curl == nullptr)
         {
-            RequestError err{.error = "CURL_EASY_INIT_FAILED"};
+            RequestError err = REQUEST_ERR_CURL_INIT;
             callback(err, json());
             return;
         }
@@ -60,15 +65,27 @@ void getRequest(
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
         CURLcode res = curl_easy_perform(curl);
-        RequestError err;
+        RequestError err = 0;
         if (res != CURLE_OK)
         {
-            RequestError err{.error = std::string("CURL_EASY_PERFORM_FAILED: ") +
-                                      curl_easy_strerror(res)};
-            callback(err, json::parse(readBuffer));
-            curl_easy_cleanup(curl);
+            err = REQUEST_ERR_CURL_PERFORM;
+            callback(err, nullptr);
+            return;
         }
-        callback(err, json::parse(readBuffer));
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &err);
+        if (err != REQUEST_ERR_OK)
+        {
+            callback(err, nullptr);
+            return;
+        }
+        if (readBuffer == "")
+        {
+            err = REQUEST_ERR_NO_JSON;
+            callback(err, nullptr);
+            return;
+        }
+        json parsed = json::parse(readBuffer);
+        callback(err, parsed);
 
         curl_easy_cleanup(curl);
     });
@@ -80,13 +97,13 @@ void putRequest(
     const std::string& token,
     const std::string& url,
     const json& jsonObj,
-    std::function<void(RequestError& err, json jsonResponse)> callback)
+    const std::function<void(RequestError& err, json jsonResponse)>& callback)
 {
     std::thread reqThread([=]() {
         CURL* curl = curl_easy_init();
         if (curl == nullptr)
         {
-            RequestError err{.error = "CURL_EASY_INIT_FAILED"};
+            RequestError err = REQUEST_ERR_CURL_INIT;
             callback(err, json());
             return;
         }
@@ -111,15 +128,27 @@ void putRequest(
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
         CURLcode res = curl_easy_perform(curl);
-        RequestError err;
+        RequestError err = 0;
         if (res != CURLE_OK)
         {
-            RequestError err{.error = std::string("CURL_EASY_PERFORM_FAILED: ") +
-                                      curl_easy_strerror(res)};
-            callback(err, json::parse(readBuffer));
-            curl_easy_cleanup(curl);
+            err = REQUEST_ERR_CURL_PERFORM;
+            callback(err, nullptr);
+            return;
         }
-        callback(err, json::parse(readBuffer));
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &err);
+        if (err != REQUEST_ERR_OK)
+        {
+            callback(err, nullptr);
+            return;
+        }
+        if (readBuffer == "")
+        {
+            err = REQUEST_ERR_NO_JSON;
+            callback(err, nullptr);
+            return;
+        }
+        json parsed = json::parse(readBuffer);
+        callback(err, parsed);
 
         curl_easy_cleanup(curl);
     });
@@ -131,13 +160,13 @@ void postRequest(
     const std::string& token,
     const std::string& url,
     const json& jsonObj,
-    std::function<void(RequestError& err, json jsonResponse)> callback)
+    const std::function<void(RequestError& err, json jsonResponse)>& callback)
 {
     std::thread reqThread([=]() {
         CURL* curl = curl_easy_init();
         if (curl == nullptr)
         {
-            RequestError err{.error = "CURL_EASY_INIT_FAILED"};
+            RequestError err = REQUEST_ERR_CURL_INIT;
             callback(err, json());
             return;
         }
@@ -156,18 +185,32 @@ void postRequest(
             headers = curl_slist_append(headers, authHeader.c_str());
         }
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        std::string* readBuffer = new std::string("");
+        std::string readBuffer;
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, readBuffer);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
         CURLcode res = curl_easy_perform(curl);
-        RequestError err;
+        RequestError err = 0;
         if (res != CURLE_OK)
         {
-            err.error = std::string("CURL_EASY_PERFORM_FAILED: ") +
-                        curl_easy_strerror(res);
+            err = REQUEST_ERR_CURL_PERFORM;
+            callback(err, nullptr);
+            return;
         }
-        callback(err, json::parse(*readBuffer));
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &err);
+        if (err != REQUEST_ERR_OK)
+        {
+            callback(err, nullptr);
+            return;
+        }
+        if (readBuffer == "")
+        {
+            err = REQUEST_ERR_NO_JSON;
+            callback(err, nullptr);
+            return;
+        }
+        json parsed = json::parse(readBuffer);
+        callback(err, parsed);
         curl_easy_cleanup(curl);
     });
 
@@ -182,18 +225,27 @@ void NetworkServiceClass::authRegister(
     json authJson = json{{"username", req.username},
                          {"password", req.password},
                          {"email", req.email}};
-    postRequest(this->token, url, authJson, [&](RequestError& err, json jsonResponse) {
-        AuthResponse response;
-        if (err.error != "")
-        {
+    try
+    {
+        postRequest(this->token, url, authJson, [&](RequestError& err, json jsonResponse) {
+            AuthResponse response{};
+            if (err != REQUEST_ERR_OK)
+            {
+                callback(err, response);
+                return;
+            }
+            std::string tokenStr = jsonResponse.at("token");
+            this->token = tokenStr;
+            response.token = tokenStr;
             callback(err, response);
-            return;
-        }
-        std::string tokenStr = jsonResponse.at("token");
-        this->token = tokenStr;
-        response.token = tokenStr.c_str();
+        });
+    }
+    catch (const json::parse_error& ex)
+    {
+        RequestError err = REQUEST_ERR_JSON_PARSE;
+        AuthResponse response{};
         callback(err, response);
-    });
+    }
 }
 
 void NetworkServiceClass::authLogin(
@@ -203,18 +255,27 @@ void NetworkServiceClass::authLogin(
     const std::string url = std::string(BACKEND_SERVER_ADDR) + "auth/authenticate";
     json authJson = json{{"username", req.username},
                          {"password", req.password}};
-    postRequest(this->token, url, authJson, [this, &callback](RequestError& err, json jsonResponse) {
-        AuthResponse response{};
-        if (err.error != "")
-        {
+    try
+    {
+        postRequest(this->token, url, authJson, [this, &callback](RequestError& err, json jsonResponse) {
+            AuthResponse response{};
+            if (err != REQUEST_ERR_OK)
+            {
+                callback(err, response);
+                return;
+            }
+            std::string tokenStr = jsonResponse.at("token");
+            this->token = tokenStr;
+            response.token = tokenStr;
             callback(err, response);
-            return;
-        }
-        std::string tokenStr = jsonResponse.at("token");
-        this->token = tokenStr;
-        response.token = tokenStr.c_str();
+        });
+    }
+    catch (const json::parse_error& ex)
+    {
+        RequestError err = REQUEST_ERR_JSON_PARSE;
+        AuthResponse response{};
         callback(err, response);
-    });
+    }
 }
 
 void NetworkServiceClass::userGetCurrentUserInfo(
@@ -222,15 +283,23 @@ void NetworkServiceClass::userGetCurrentUserInfo(
     std::function<void(RequestError& err, User& user)> callback)
 {
     const std::string url = std::string(BACKEND_SERVER_ADDR) + "users";
-    getRequest(this->token, url, [this, &callback, &user](RequestError& err, const json& jsonResponse) {
-        if (err.error != "")
-        {
+    try
+    {
+        getRequest(this->token, url, [this, &callback, &user](RequestError& err, const json& jsonResponse) {
+            if (err != REQUEST_ERR_OK)
+            {
+                callback(err, user);
+                return;
+            }
+            from_json_to_user(jsonResponse, user);
             callback(err, user);
-            return;
-        }
-        from_json_to_user(jsonResponse, user);
+        });
+    }
+    catch (const json::parse_error& ex)
+    {
+        RequestError err = REQUEST_ERR_JSON_PARSE;
         callback(err, user);
-    });
+    }
 }
 
 void NetworkServiceClass::userUpdateCurrentUserInfo(
@@ -241,31 +310,47 @@ void NetworkServiceClass::userUpdateCurrentUserInfo(
     json jsonObj = json{{"username", user.username},
                         {"email", user.email},
                         {"name", user.name}};
-    putRequest(this->token, url, jsonObj, [this, &callback, &user](RequestError& err, const json& jsonResponse) {
-        if (err.error != "")
-        {
+    try
+    {
+        putRequest(this->token, url, jsonObj, [this, &callback, &user](RequestError& err, const json& jsonResponse) {
+            if (err != REQUEST_ERR_OK)
+            {
+                callback(err, user);
+                return;
+            }
+            from_json_to_user(jsonResponse, user);
             callback(err, user);
-            return;
-        }
-        from_json_to_user(jsonResponse, user);
+        });
+    }
+    catch (const json::parse_error& ex)
+    {
+        RequestError err = REQUEST_ERR_JSON_PARSE;
         callback(err, user);
-    });
+    }
 }
 
 void NetworkServiceClass::createNewSpeaker(
     Speaker& speaker,
     std::function<void(RequestError& err, Speaker& speaker)> callback)
 {
-    const std::string url = std::string(BACKEND_SERVER_ADDR) + "speakers";
-    json jsonObj = json{{"name", speaker.name}, {"id", speaker.id}};
-    postRequest(this->token, url, jsonObj, [this, &callback, &speaker](RequestError& err, const json& jsonResponse) {
-        if (err.error != "")
-        {
+    try
+    {
+        const std::string url = std::string(BACKEND_SERVER_ADDR) + "speakers";
+        json jsonObj = json{{"name", speaker.name}, {"id", speaker.id}};
+        postRequest(this->token, url, jsonObj, [this, &callback, &speaker](RequestError& err, const json& jsonResponse) {
+            if (err != REQUEST_ERR_OK)
+            {
+                callback(err, speaker);
+            }
+            from_json_to_speaker(jsonResponse, speaker);
             callback(err, speaker);
-        }
-        from_json_to_speaker(jsonResponse, speaker);
+        });
+    }
+    catch (const json::parse_error& ex)
+    {
+        RequestError err = REQUEST_ERR_JSON_PARSE;
         callback(err, speaker);
-    });
+    }
 }
 
 void NetworkServiceClass::updateSpeaker(
@@ -274,22 +359,30 @@ void NetworkServiceClass::updateSpeaker(
 {
     if (speaker.id == "NOID")
     {
-        RequestError err{.error = "SPEAKER_UPD_NOID"};
+        RequestError err = REQUEST_ERR_OBJ_NOID;
         callback(err, speaker);
         return;
     }
-    const std::string url = std::string(BACKEND_SERVER_ADDR) + "speakers/" + speaker.id;
-    json jsonObj = json{{"name", speaker.name}, {"id", speaker.id}};
-    putRequest(this->token, url, jsonObj, [this, &callback](RequestError& err, const json& jsonResponse) {
-        Speaker speaker;
-        if (err.error != "")
-        {
+    try
+    {
+        const std::string url = std::string(BACKEND_SERVER_ADDR) + "speakers/" + speaker.id;
+        json jsonObj = json{{"name", speaker.name}, {"id", speaker.id}};
+        putRequest(this->token, url, jsonObj, [this, &callback](RequestError& err, const json& jsonResponse) {
+            Speaker speaker;
+            if (err != REQUEST_ERR_OK)
+            {
+                callback(err, speaker);
+                return;
+            }
+            from_json_to_speaker(jsonResponse, speaker);
             callback(err, speaker);
-            return;
-        }
-        from_json_to_speaker(jsonResponse, speaker);
+        });
+    }
+    catch (const json::parse_error& ex)
+    {
+        RequestError err = REQUEST_ERR_JSON_PARSE;
         callback(err, speaker);
-    });
+    }
 }
 
 void NetworkServiceClass::deleteSpeaker(
@@ -298,7 +391,7 @@ void NetworkServiceClass::deleteSpeaker(
 {
     if (speaker.id == "NOID")
     {
-        RequestError err{.error = "SPEAKER_DEL_NOID"};
+        RequestError err = REQUEST_ERR_OBJ_NOID;
         callback(err);
         return;
     }

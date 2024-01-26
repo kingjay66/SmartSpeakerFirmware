@@ -2,7 +2,7 @@
 
 User::User()
   : id("NOID")
-  , userType(USER)
+  , userType("USER")
   , username("NOUSERNAME")
   , email("NOEMAIL")
   , name("NONAME")

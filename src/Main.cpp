@@ -65,12 +65,32 @@ int rest_api_test()
         .email = "email",
         .password = "password",
     };
-    NetworkService.authLogin(req, [](RequestError& err, AuthResponse& response) {
-        if (err.error != "")
+    NetworkService.authRegister(req, [=](RequestError& err, AuthResponse& response) {
+        if (err != REQUEST_ERR_OK) 
         {
-            std::cerr << err.error << std::endl;
+            std::cerr << err << std::endl;
+            return;
         }
         std::cout << response.token << std::endl;
+    });
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    NetworkService.authLogin(req, [=](RequestError& err, AuthResponse& response) {
+        if (err != REQUEST_ERR_OK)
+        {
+            std::cerr << err << std::endl;
+            return;
+        }
+        std::cout << response.token << std::endl;
+    });
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    User user;
+    NetworkService.userGetCurrentUserInfo(user, [=](RequestError& err, User& user) {
+        if (err != REQUEST_ERR_OK) 
+        {
+            std::cerr << err << std::endl;
+            return;
+        }
+        std::cout << user.id << std::endl;
     });
     while (true)
     {};
