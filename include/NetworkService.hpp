@@ -7,13 +7,17 @@
 #include <string>
 
 #ifdef PRODUCTION
-    #define BACKEND_SERVER_ADDR "https://yarmanprojects.com/speaker/api/"
-#else  // PRODUCTION
+    #ifndef BACKEND_SERVER_ADDR
+        #define BACKEND_SERVER_ADDR "https://yarmanprojects.com/speaker/api/"
+    #endif  // BACKEND_SERVER_ADDR
+#else       // PRODUCTION
     #ifndef TESTING
         #define TESTING
     #endif  // TESTING
-    #define BACKEND_SERVER_ADDR "http://127.0.0.1:8080/"
-#endif  // PRODUCTION
+    #ifndef BACKEND_SERVER_ADDR
+        #define BACKEND_SERVER_ADDR "http://127.0.0.1:8080/"
+    #endif  // BACKEND_SERVER_ADDR
+#endif      // PRODUCTION
 
 #define REQUEST_ERR_OK 200
 
@@ -49,29 +53,32 @@ class NetworkServiceClass
   private:
     std::string token;
 
+    std::string loadToken();
+    void saveToken();
+
   public:
     void authRegister(
         AuthRequest req,
-        std::function<void(RequestError& err, AuthResponse& response)> callback);
+        std::function<void(RequestError err, AuthResponse& response)> callback);
     void authLogin(
         AuthRequest req,
-        std::function<void(RequestError& err, AuthResponse& response)> callback);
+        std::function<void(RequestError err, AuthResponse& response)> callback);
 
     void userGetCurrentUserInfo(
         User& user,
-        std::function<void(RequestError& err, User& user)> callback);
+        std::function<void(RequestError err, User& user)> callback);
     void userUpdateCurrentUserInfo(
         User& user,
-        std::function<void(RequestError& err, User& user)> callback);
+        std::function<void(RequestError err, User& user)> callback);
 
     void createNewSpeaker(
         Speaker& speaker,
-        std::function<void(RequestError& err, Speaker& speaker)> callback);
+        std::function<void(RequestError err, Speaker& speaker)> callback);
     void updateSpeaker(
         Speaker& speaker,
-        std::function<void(RequestError& err, Speaker& speaker)>& callback);
+        std::function<void(RequestError err, Speaker& speaker)>& callback);
     void deleteSpeaker(Speaker& speaker,
-                       std::function<void(RequestError& err)> callback);
+                       std::function<void(RequestError err)>& callback);
 };
 
 extern NetworkServiceClass NetworkService;

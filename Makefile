@@ -1,4 +1,4 @@
-CC			 := /usr/bin/g++ -std=c++11
+CC		 := /usr/bin/g++ -std=c++11
 OUT_DIR	 := ./build
 
 all:

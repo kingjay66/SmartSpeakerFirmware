@@ -13,4 +13,3 @@ Speaker::Speaker(std::string id, std::string name)
   , name(std::move(name))
 {
 }
-

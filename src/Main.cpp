@@ -65,7 +65,7 @@ int rest_api_test()
         .email = "email",
         .password = "password",
     };
-    NetworkService.authRegister(req, [=](RequestError& err, AuthResponse& response) {
+    NetworkService.authRegister(req, [=](RequestError err, AuthResponse& response) {
         if (err != REQUEST_ERR_OK) 
         {
             std::cerr << err << std::endl;
@@ -74,7 +74,7 @@ int rest_api_test()
         std::cout << response.token << std::endl;
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
-    NetworkService.authLogin(req, [=](RequestError& err, AuthResponse& response) {
+    NetworkService.authLogin(req, [=](RequestError err, AuthResponse& response) {
         if (err != REQUEST_ERR_OK)
         {
             std::cerr << err << std::endl;
@@ -84,7 +84,7 @@ int rest_api_test()
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     User user;
-    NetworkService.userGetCurrentUserInfo(user, [=](RequestError& err, User& user) {
+    NetworkService.userGetCurrentUserInfo(user, [=](RequestError err, User& user) {
         if (err != REQUEST_ERR_OK) 
         {
             std::cerr << err << std::endl;
@@ -99,6 +99,6 @@ int rest_api_test()
 
 int main()
 {
-    rest_api_test();
-    //return sdl_test();
+    //rest_api_test();
+    return sdl_test();
 }
