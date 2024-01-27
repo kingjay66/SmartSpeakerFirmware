@@ -16,6 +16,46 @@
 #define SCREEN_WIDTH SCREEN_RADIUS * 2
 #define SCREEN_HEIGHT SCREEN_RADIUS * 2
 
+void drawCircle(SDL_Renderer* renderer, int32_t centerX, int32_t centerY, int32_t radius)
+{
+    const int32_t diameter = (radius * 2);
+
+    int32_t x = (radius - 1);
+    int32_t y = 0;
+    int32_t tx = 1;
+    int32_t ty = 1;
+    int32_t error = (tx - diameter);
+
+    while (x >= y)
+    {
+        // Draw horizontal lines from the left to the right of the circle
+        for (int i = centerX - x; i <= centerX + x; i++)
+        {
+            SDL_RenderDrawPoint(renderer, i, centerY + y);
+            SDL_RenderDrawPoint(renderer, i, centerY - y);
+        }
+        for (int i = centerX - y; i <= centerX + y; i++)
+        {
+            SDL_RenderDrawPoint(renderer, i, centerY + x);
+            SDL_RenderDrawPoint(renderer, i, centerY - x);
+        }
+
+        if (error <= 0)
+        {
+            ++y;
+            error += ty;
+            ty += 2;
+        }
+
+        if (error > 0)
+        {
+            --x;
+            tx += 2;
+            error += (tx - diameter);
+        }
+    }
+}
+
 int sdl_test()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -45,16 +85,39 @@ int sdl_test()
         return EXIT_FAILURE;
     }
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+    bool quit = false;
+    SDL_Event e;
+    while (!quit)
+    {
+        // Handle events on queue
+        while (SDL_PollEvent(&e) != 0)
+        {
+            if (e.type == SDL_QUIT)
+            {
+                quit = true;
+            }
+            else if (e.type == SDL_KEYDOWN)
+            {
+                quit = true;  // Exit on any key press
+            }
+        }
 
-    SDL_Delay(5000);
+        // Clear screen
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderClear(renderer);
+
+        // Draw and fill circle with blue color
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);  // Blue color
+        drawCircle(renderer, 240, 240, 240);                       // Circle with radius 240
+
+        // Update screen
+        SDL_RenderPresent(renderer);
+    }
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 int rest_api_test()
