@@ -29,18 +29,22 @@ const std::vector<std::string> words = {"Music", "Videos", "Equalizer", "Other",
 
 int selectedWord = 0;  // Index of the currently selected word
 
+const int ANIMATION_FRAMES = 30;
+int animationProgress = 0;
+int lastSelectedWord = 0;
+
 // Function to initialize SDL and SDL_ttf
 bool init(SDL_Window** window, SDL_Renderer** renderer, TTF_Font** font)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << '\n';
         return false;
     }
 
     if (TTF_Init() == -1)
     {
-        std::cerr << "SDL_ttf could not initialize! TTF_Error: " << TTF_GetError() << std::endl;
+        std::cerr << "SDL_ttf could not initialize! TTF_Error: " << TTF_GetError() << '\n';
         SDL_Quit();
         return false;
     }
@@ -48,7 +52,7 @@ bool init(SDL_Window** window, SDL_Renderer** renderer, TTF_Font** font)
     *window = SDL_CreateWindow("Text Circle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
     if ((*window) == nullptr)
     {
-        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << '\n';
         TTF_Quit();
         SDL_Quit();
         return false;
@@ -57,7 +61,7 @@ bool init(SDL_Window** window, SDL_Renderer** renderer, TTF_Font** font)
     *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
     if ((*renderer) == nullptr)
     {
-        std::cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+        std::cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << '\n';
         SDL_DestroyWindow(*window);
         TTF_Quit();
         SDL_Quit();
@@ -67,7 +71,7 @@ bool init(SDL_Window** window, SDL_Renderer** renderer, TTF_Font** font)
     *font = TTF_OpenFont("/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", MAX_FONT_SIZE);  // Replace with the path to your font file
     if ((*font) == nullptr)
     {
-        std::cerr << "Failed to load font! TTF_Error: " << TTF_GetError() << std::endl;
+        std::cerr << "Failed to load font! TTF_Error: " << TTF_GetError() << '\n';
         SDL_DestroyRenderer(*renderer);
         SDL_DestroyWindow(*window);
         TTF_Quit();
@@ -128,6 +132,10 @@ void close(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font)
     SDL_Quit();
 }
 
+double lerp(double start, double end, double t) {
+    return start + t * (end - start);
+}
+
 // Main function
 int main()
 {
@@ -137,7 +145,7 @@ int main()
 
     if (!init(&window, &renderer, &font))
     {
-        std::cerr << "Failed to initialize!" << std::endl;
+        std::cerr << "Failed to initialize!" << '\n';
         return 1;
     }
 
@@ -158,18 +166,25 @@ int main()
                 switch (e.key.keysym.sym)
                 {
                     case SDLK_UP:
-                        if (selectedWord > 0) {
+                        lastSelectedWord = selectedWord;
+                        if (selectedWord > 0)
+                        {
                             selectedWord--;
                         }
+                        animationProgress = 1;
                         break;
                     case SDLK_DOWN:
-                        if (selectedWord < NUM_WORDS - 1) {
+                        lastSelectedWord = selectedWord;
+                        if (selectedWord < NUM_WORDS - 1)
+                        {
                             selectedWord++;
                         }
+                        animationProgress = 1;
                         break;
                 }
             }
         }
+        double t = static_cast<double>(animationProgress) / ANIMATION_FRAMES;
 
         // Clear screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
@@ -177,23 +192,35 @@ int main()
 
         SDL_SetRenderDrawColor(renderer, 155, 0, 255, 0xFF);
         drawCircle(renderer, 240, 240, 240);
-
-        // Render text
         for (int i = 0; i < NUM_WORDS; ++i)
         {
-            int distance = std::abs(i - selectedWord);
-            double fontSize = MAX_FONT_SIZE - distance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (NUM_WORDS / 1.5);
-            TTF_Font* tempFont = TTF_OpenFont("/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", static_cast<int>(fontSize));  // You should optimize this by caching font sizes
-            SDL_Color textColor = {0, 0, 0, 0xFF};
+            int lastDistance = std::abs(i - lastSelectedWord);
+            int currentDistance = std::abs(i - selectedWord);
 
+            double lastFontSize = MAX_FONT_SIZE - lastDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (NUM_WORDS / 1.5);
+            double currentFontSize = MAX_FONT_SIZE - currentDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (NUM_WORDS / 1.5);
+
+            double fontSize = lerp(lastFontSize, currentFontSize, t);
+            TTF_Font* tempFont = TTF_OpenFont("/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", static_cast<int>(fontSize));
+
+            SDL_Color textColor = {0, 0, 0, 0xFF};
             SDL_Surface* textSurface = TTF_RenderText_Solid(tempFont, words[i].c_str(), textColor);
             SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
             int textWidth = textSurface->w;
             int textHeight = textSurface->h;
+
+            double lastX = (WINDOW_WIDTH - textWidth) / 2 - std::cos(lastDistance) * 60 + 50;
+            double currentX = (WINDOW_WIDTH - textWidth) / 2 - std::cos(currentDistance) * 60 + 50;
+            double xPosition = lerp(lastX, currentX, t);
+
+            double lastY = (WINDOW_HEIGHT - textHeight) / 2 + (i - lastSelectedWord) * 80;
+            double currentY = (WINDOW_HEIGHT - textHeight) / 2 + (i - selectedWord) * 80;
+            double yPosition = lerp(lastY, currentY, t);
+
             SDL_Rect renderQuad = {
-                static_cast<int>((WINDOW_WIDTH - textWidth) / 2 - std::cos(i - selectedWord) * 60),
-                (WINDOW_HEIGHT - textHeight) / 2 + (i - selectedWord) * 80,
+                static_cast<int>(xPosition),
+                static_cast<int>(yPosition),
                 textWidth,
                 textHeight};
 
@@ -204,7 +231,16 @@ int main()
             TTF_CloseFont(tempFont);
         }
 
-        // Update screen
+        if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES)
+        {
+            animationProgress++;
+        }
+        else if (animationProgress > ANIMATION_FRAMES)
+        {
+            lastSelectedWord = selectedWord;
+            animationProgress = 0;
+        }
+
         SDL_RenderPresent(renderer);
     }
 
