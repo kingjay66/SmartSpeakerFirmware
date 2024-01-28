@@ -1,4 +1,8 @@
 build/
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
 
 .clangd
 compile_commands.json

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(ssf)
 
 # Set the C++ standard to C++11
@@ -25,4 +25,4 @@ add_executable(ssf
 )
 
 # Link libraries
-target_link_libraries(ssf SDL2 curl)
+target_link_libraries(ssf SDL2 SDL2_ttf curl)
