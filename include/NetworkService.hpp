@@ -27,7 +27,7 @@
 #define REQUEST_ERR_OBJ_NOID -4
 #define REQUEST_ERR_JSON_PARSE -5
 
-#define RequestError long
+using RequestError = long;
 
 struct AuthRequest
 {
