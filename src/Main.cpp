@@ -29,7 +29,7 @@ const std::vector<std::string> words = {"Music", "Videos", "Equalizer", "Other",
 
 int selectedWord = 0;  // Index of the currently selected word
 
-const int ANIMATION_FRAMES = 30;
+const int ANIMATION_FRAMES = 10;
 int animationProgress = 0;
 int lastSelectedWord = 0;
 
@@ -132,7 +132,8 @@ void close(SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font)
     SDL_Quit();
 }
 
-double lerp(double start, double end, double t) {
+double lerp(double start, double end, double t)
+{
     return start + t * (end - start);
 }
 
@@ -152,8 +153,16 @@ int main()
     bool quit = false;
     SDL_Event e;
 
+    const int FPS = 30;                 // Desired frame rate
+    const int frameDelay = 1000 / FPS;  // Max time between frames
+    Uint32 frameStart = 0;
+    int frameTime = 0;
+
+    bool needRedraw = true;
+
     while (!quit)
     {
+        frameStart = SDL_GetTicks();
         // Event handling
         while (SDL_PollEvent(&e) != 0)
         {
@@ -166,6 +175,7 @@ int main()
                 switch (e.key.keysym.sym)
                 {
                     case SDLK_UP:
+                        needRedraw = true;
                         lastSelectedWord = selectedWord;
                         if (selectedWord > 0)
                         {
@@ -174,6 +184,7 @@ int main()
                         animationProgress = 1;
                         break;
                     case SDLK_DOWN:
+                        needRedraw = true;
                         lastSelectedWord = selectedWord;
                         if (selectedWord < NUM_WORDS - 1)
                         {
@@ -192,6 +203,7 @@ int main()
 
         SDL_SetRenderDrawColor(renderer, 155, 0, 255, 0xFF);
         drawCircle(renderer, 240, 240, 240);
+
         for (int i = 0; i < NUM_WORDS; ++i)
         {
             int lastDistance = std::abs(i - lastSelectedWord);
@@ -239,9 +251,18 @@ int main()
         {
             lastSelectedWord = selectedWord;
             animationProgress = 0;
+            needRedraw = false;
         }
 
-        SDL_RenderPresent(renderer);
+        frameTime = SDL_GetTicks() - frameStart;
+        if (frameDelay > frameTime)
+        {
+            if (needRedraw)
+            {
+                SDL_RenderPresent(renderer);
+            }
+            SDL_Delay(frameDelay - frameTime);
+        }
     }
 
     close(window, renderer, font);
