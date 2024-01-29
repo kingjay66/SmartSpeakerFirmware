@@ -147,7 +147,7 @@ void GUIClass::mainThread() {
             double currentFontSize = MAX_FONT_SIZE - currentDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5);
 
             double fontSize = lerp(lastFontSize, currentFontSize, t);
-            TTF_Font* tempFont = TTF_OpenFont("/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", static_cast<int>(fontSize));
+            TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, static_cast<int>(fontSize));
 
             SDL_Color textColor = {0, 0, 0, 0xFF};
             SDL_Surface* textSurface = TTF_RenderText_Solid(tempFont, menuItems[i].data(), textColor);
