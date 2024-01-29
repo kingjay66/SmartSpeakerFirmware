@@ -1,6 +1,8 @@
 #pragma once
 
 #include <SDL2/SDL_ttf.h>
+#include <array>
+#include <string_view>
 
 struct SDLColor {
     Uint8 red = 0;
@@ -27,6 +29,9 @@ class GUIClass {
     void setColor(SDLColor color);
 
     void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
+
+    template<unsigned int i>
+    void renderSubMenu(std::array<std::string_view, i> array);
 
   public:
     void init();

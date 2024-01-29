@@ -6,6 +6,10 @@
 #include <array>
 #include <iostream>
 
+#ifndef PRODUCTION
+    #define TESTING
+#endif  // PRODUCTION
+
 #define SCREEN_RADIUS 240
 
 #define WINDOW_WIDTH SCREEN_RADIUS * 2
@@ -17,22 +21,37 @@
     #define SDL_WINDOW_TYPE SDL_WINDOW_OPENGL
 #endif  // FB_EN
 
-#define MAX_FONT_SIZE 32
-#define MIN_FONT_SIZE 12
+#ifndef MAX_FONT_SIZE
+    #define MAX_FONT_SIZE 32
+#endif  // MAX_FONT_SIZE
+
+#ifndef MIN_FONT_SIZE
+    #define MIN_FONT_SIZE 12
+#endif  // MIN_FONT_SIZE
+
+#if MAX_FONT_SIZE < MIN_FONT_SIZE
+    #error MAX_FONT_SIZE has to be greater than MIN_FONT_SIZE
+#endif  // MAX_FONT_SIZE < MIN_FONT_SIZE
 
 #ifndef FONT_PATH
     #define FONT_PATH "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"
 #endif  // FONT_PATH
 
 #ifndef FPS
-    #define FPS 60
+    #define FPS 60.0
 #endif  // FPS
 
-#define FRAME_DELAY 1000 / FPS
+#define FRAME_DELAY 1000.0 / FPS
 
 #define ANIMATION_FRAMES FPS / 6.0
 
 constexpr std::array<std::string_view, 5> menuItems = {"Music", "Videos", "Equalizer", "Other", "Settings"};
+
+constexpr std::array<std::string_view, 5> musicMenuItems = {"Play", "Pause", "Next", "Previous", "Stop"};
+constexpr std::array<std::string_view, 3> videoMenuItems = {"Files", "YouTube", "Stream"};
+constexpr std::array<std::string_view, 3> eqMenuItems = {"Bass", "Mid", "High"};
+constexpr std::array<std::string_view, 3> otherMenuItems = {"Test", "Other", "Stuff"};
+constexpr std::array<std::string_view, 5> settingsMenuItems = {"Wi-Fi", "Bluetooth", "Sound", "Speakers", "About"};
 
 GUIClass GUI = GUIClass();
 
@@ -90,6 +109,30 @@ void GUIClass::init() {
 #endif  // PRODUCTION
 }
 
+template<unsigned int i>
+void GUIClass::renderSubMenu(std::array<std::string_view, i> array) {
+    TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, MIN_FONT_SIZE + 4);
+    SDL_Color textColor = {0, 0, 0, 0xFF};
+    for (int j = 0; j < array.size(); j++) {
+        SDL_Surface* textSurface = TTF_RenderText_Solid(tempFont, array[j].data(), textColor);
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        int textWidth = textSurface->w;
+        int textHeight = textSurface->h;
+        double xPosition = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 + 140 + cos(5 - j) * 30;
+        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (5 - j) * 30 - 90;
+        SDL_Rect renderQuad = {
+            static_cast<int>(xPosition),
+            static_cast<int>(yPosition),
+            textWidth,
+            textHeight};
+        SDL_RenderCopy(renderer, textTexture, nullptr, &renderQuad);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+    }
+    TTF_CloseFont(tempFont);
+}
+
 void GUIClass::mainThread() {
     bool quit = false;
     SDL_Event e;
@@ -109,6 +152,7 @@ void GUIClass::mainThread() {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
                 quit = true;
+#ifdef TESTING
             } else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                     case SDLK_UP:
@@ -128,6 +172,7 @@ void GUIClass::mainThread() {
                         animationProgress = 1;
                         break;
                 }
+#endif
             }
         }
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
@@ -175,6 +220,21 @@ void GUIClass::mainThread() {
             SDL_FreeSurface(textSurface);
             SDL_DestroyTexture(textTexture);
             TTF_CloseFont(tempFont);
+        }
+        if (selectedWord == 0) {  // MUSIC
+            renderSubMenu<musicMenuItems.size()>(musicMenuItems);
+        }
+        if (selectedWord == 1) {  // VIDEO
+            renderSubMenu<videoMenuItems.size()>(videoMenuItems);
+        }
+        if (selectedWord == 2) {  // EQ
+            renderSubMenu<eqMenuItems.size()>(eqMenuItems);
+        }
+        if (selectedWord == 3) {  // OTHER
+            renderSubMenu<otherMenuItems.size()>(otherMenuItems);
+        }
+        if (selectedWord == 4) {  // SETTINGS
+            renderSubMenu<settingsMenuItems.size()>(settingsMenuItems);
         }
 
         if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES) {
