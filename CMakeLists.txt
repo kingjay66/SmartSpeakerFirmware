@@ -11,6 +11,18 @@ set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 # Specify the output directory for the compiled binaries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
+# Check if Clang-Tidy is available
+if(CLANG_TIDY)
+    find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
+    if(CLANG_TIDY_COMMAND)
+        # Set the clang-tidy checks, using your .clang-tidy configuration file
+        set(CMAKE_CXX_CLANG_TIDY 
+            "${CLANG_TIDY_COMMAND};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
+    else()
+        message(STATUS "clang-tidy not found")
+    endif()
+endif()
+
 # Include directories
 include_directories(include)
 
