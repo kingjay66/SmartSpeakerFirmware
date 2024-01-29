@@ -2,8 +2,7 @@
 
 #include <SDL2/SDL_ttf.h>
 
-struct SDLColor
-{
+struct SDLColor {
     Uint8 red = 0;
     Uint8 green = 0;
     Uint8 blue = 0;
@@ -19,8 +18,7 @@ constexpr SDLColor color_black = {};
 
 constexpr SDLColor color_purple = {.red = 155, .blue = 255};
 
-class GUIClass
-{
+class GUIClass {
   private:
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;

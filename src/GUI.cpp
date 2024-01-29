@@ -36,29 +36,24 @@ constexpr std::array<std::string_view, 5> menuItems = {"Music", "Videos", "Equal
 
 GUIClass GUI = GUIClass();
 
-double lerp(double start, double end, double t)
-{
+double lerp(double start, double end, double t) {
     return start + t * (end - start);
 }
 
-void GUIClass::init()
-{
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
+void GUIClass::init() {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << '\n';
         exit(EXIT_FAILURE);
     }
 
-    if (TTF_Init() == -1)
-    {
+    if (TTF_Init() == -1) {
         std::cerr << "SDL_ttf could not initialize! TTF_Error: " << TTF_GetError() << '\n';
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
 
     window = SDL_CreateWindow("Text Circle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-    if (window == nullptr)
-    {
+    if (window == nullptr) {
         std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << '\n';
         TTF_Quit();
         SDL_Quit();
@@ -66,8 +61,7 @@ void GUIClass::init()
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr)
-    {
+    if (renderer == nullptr) {
         std::cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << '\n';
         SDL_DestroyWindow(window);
         TTF_Quit();
@@ -76,8 +70,7 @@ void GUIClass::init()
     }
 
     font = TTF_OpenFont(FONT_PATH, MAX_FONT_SIZE);
-    if (font == nullptr)
-    {
+    if (font == nullptr) {
         std::cerr << "Failed to load font! TTF_Error: " << TTF_GetError() << '\n';
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -97,8 +90,7 @@ void GUIClass::init()
 #endif  // PRODUCTION
 }
 
-void GUIClass::mainThread()
-{
+void GUIClass::mainThread() {
     bool quit = false;
     SDL_Event e;
 
@@ -111,25 +103,18 @@ void GUIClass::mainThread()
     int selectedWord = 0;
     int lastSelectedWord = 0;
 
-    while (!quit)
-    {
+    while (!quit) {
         frameStart = SDL_GetTicks();
         // Event handling
-        while (SDL_PollEvent(&e) != 0)
-        {
-            if (e.type == SDL_QUIT)
-            {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
                 quit = true;
-            }
-            else if (e.type == SDL_KEYDOWN)
-            {
-                switch (e.key.keysym.sym)
-                {
+            } else if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
                     case SDLK_UP:
                         needRedraw = true;
                         lastSelectedWord = selectedWord;
-                        if (selectedWord > 0)
-                        {
+                        if (selectedWord > 0) {
                             selectedWord--;
                         }
                         animationProgress = 1;
@@ -137,8 +122,7 @@ void GUIClass::mainThread()
                     case SDLK_DOWN:
                         needRedraw = true;
                         lastSelectedWord = selectedWord;
-                        if (selectedWord < menuItems.size() - 1)
-                        {
+                        if (selectedWord < menuItems.size() - 1) {
                             selectedWord++;
                         }
                         animationProgress = 1;
@@ -155,8 +139,7 @@ void GUIClass::mainThread()
         SDL_SetRenderDrawColor(renderer, 155, 0, 255, 0xFF);
         drawCircle(240, 240, 240);
 
-        for (int i = 0; i < menuItems.size(); ++i)
-        {
+        for (int i = 0; i < menuItems.size(); ++i) {
             int lastDistance = std::abs(i - lastSelectedWord);
             int currentDistance = std::abs(i - selectedWord);
 
@@ -194,22 +177,17 @@ void GUIClass::mainThread()
             TTF_CloseFont(tempFont);
         }
 
-        if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES)
-        {
+        if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES) {
             animationProgress++;
-        }
-        else if (animationProgress > ANIMATION_FRAMES)
-        {
+        } else if (animationProgress > ANIMATION_FRAMES) {
             lastSelectedWord = selectedWord;
             animationProgress = 0;
             needRedraw = false;
         }
 
         frameTime = SDL_GetTicks() - frameStart;
-        if (FRAME_DELAY > frameTime)
-        {
-            if (needRedraw)
-            {
+        if (FRAME_DELAY > frameTime) {
+            if (needRedraw) {
                 SDL_RenderPresent(renderer);
             }
             SDL_Delay(FRAME_DELAY - frameTime);
@@ -217,8 +195,7 @@ void GUIClass::mainThread()
     }
 }
 
-void GUIClass::close()
-{
+void GUIClass::close() {
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -226,13 +203,11 @@ void GUIClass::close()
     SDL_Quit();
 }
 
-void GUIClass::setColor(SDLColor color)
-{
+void GUIClass::setColor(SDLColor color) {
     SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, color.alpha);
 }
 
-void GUIClass::drawCircle(int32_t centerX, int32_t centerY, int32_t radius)
-{
+void GUIClass::drawCircle(int32_t centerX, int32_t centerY, int32_t radius) {
     const int32_t diameter = (radius * 2);
 
     int32_t x = (radius - 1);
@@ -241,28 +216,23 @@ void GUIClass::drawCircle(int32_t centerX, int32_t centerY, int32_t radius)
     int32_t ty = 1;
     int32_t error = (tx - diameter);
 
-    while (x >= y)
-    {
-        for (int i = centerX - x; i <= centerX + x; i++)
-        {
+    while (x >= y) {
+        for (int i = centerX - x; i <= centerX + x; i++) {
             SDL_RenderDrawPoint(renderer, i, centerY + y);
             SDL_RenderDrawPoint(renderer, i, centerY - y);
         }
-        for (int i = centerX - y; i <= centerX + y; i++)
-        {
+        for (int i = centerX - y; i <= centerX + y; i++) {
             SDL_RenderDrawPoint(renderer, i, centerY + x);
             SDL_RenderDrawPoint(renderer, i, centerY - x);
         }
 
-        if (error <= 0)
-        {
+        if (error <= 0) {
             ++y;
             error += ty;
             ty += 2;
         }
 
-        if (error > 0)
-        {
+        if (error > 0) {
             --x;
             tx += 2;
             error += (tx - diameter);

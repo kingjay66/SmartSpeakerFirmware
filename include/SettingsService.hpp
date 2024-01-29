@@ -2,8 +2,7 @@
 
 #include <Settings.hpp>
 
-class SettingsServiceClass
-{
+class SettingsServiceClass {
   private:
   public:
     void connectToWiFi(const std::string& ssid, const std::string& password);

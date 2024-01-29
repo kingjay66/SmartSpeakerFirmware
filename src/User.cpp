@@ -5,6 +5,5 @@ User::User()
   , userType("USER")
   , username("NOUSERNAME")
   , email("NOEMAIL")
-  , name("NONAME")
-{
+  , name("NONAME") {
 }

@@ -1,11 +1,11 @@
 #pragma once
 
 #include <string>
-class Settings
-{
+class Settings {
   private:
     std::string wifi_ssid;
     std::string wifi_pass;
+
   public:
     Settings();
     ~Settings();

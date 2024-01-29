@@ -29,27 +29,23 @@
 
 using RequestError = long;
 
-struct AuthRequest
-{
+struct AuthRequest {
     const std::string username;
     const std::string email;
     const std::string password;
 };
 
-struct UserUpdateRequest
-{
+struct UserUpdateRequest {
     const std::string name;
     const std::string username;
     const std::string email;
 };
 
-struct AuthResponse
-{
+struct AuthResponse {
     std::string token;
 };
 
-class NetworkServiceClass
-{
+class NetworkServiceClass {
   private:
     std::string token;
 
@@ -57,7 +53,6 @@ class NetworkServiceClass
     void saveToken();
 
   public:
-
     void authRegister(
         AuthRequest req,
         std::function<void(RequestError err, AuthResponse& response)> callback);
@@ -83,4 +78,3 @@ class NetworkServiceClass
 };
 
 extern NetworkServiceClass NetworkService;
-

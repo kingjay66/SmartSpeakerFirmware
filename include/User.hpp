@@ -2,8 +2,7 @@
 
 #include <string>
 
-class User
-{
+class User {
   private:
   public:
     User();

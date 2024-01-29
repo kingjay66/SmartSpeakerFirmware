@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-class Speaker
-{
+
+class Speaker {
   private:
   public:
     std::string id;
