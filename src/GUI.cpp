@@ -25,7 +25,7 @@
 #endif  // FONT_PATH
 
 #ifndef FPS
-    #define FPS 30
+    #define FPS 60
 #endif  // FPS
 
 #define FRAME_DELAY 1000 / FPS
