@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(ssf)
 
-# Set the C++ standard to C++11
-set(CMAKE_CXX_STANDARD 11)
+# Set the C++ standard to C++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Define the compiler
@@ -16,6 +16,7 @@ include_directories(include)
 
 # Add the source files
 add_executable(ssf
+    src/GUI.cpp
     src/Main.cpp
     src/User.cpp
     src/Speaker.cpp

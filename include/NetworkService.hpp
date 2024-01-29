@@ -57,12 +57,6 @@ class NetworkServiceClass
     void saveToken();
 
   public:
-    NetworkServiceClass() = default;
-    NetworkServiceClass(const NetworkServiceClass&) = default;
-    NetworkServiceClass(NetworkServiceClass&&) = default;
-    NetworkServiceClass& operator=(const NetworkServiceClass&) = default;
-    NetworkServiceClass& operator=(NetworkServiceClass&&) = delete;
-    ~NetworkServiceClass();
 
     void authRegister(
         AuthRequest req,

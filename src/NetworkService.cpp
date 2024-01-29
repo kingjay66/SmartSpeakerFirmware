@@ -274,8 +274,6 @@ void deleteRequest(
     reqThread.detach();
 }
 
-NetworkServiceClass::~NetworkServiceClass() = default;
-
 void NetworkServiceClass::authRegister(
     AuthRequest req,
     std::function<void(RequestError err, AuthResponse& response)> callback)
