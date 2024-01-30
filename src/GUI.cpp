@@ -114,12 +114,12 @@ void GUIClass::renderSubMenu(std::array<std::string_view, i> array) {
     TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, MIN_FONT_SIZE + 4);
     SDL_Color textColor = {0, 0, 0, 0xFF};
     for (int j = 0; j < array.size(); j++) {
-        SDL_Surface* textSurface = TTF_RenderText_Solid(tempFont, array[j].data(), textColor);
+        SDL_Surface* textSurface = TTF_RenderText_Blended(tempFont, array[j].data(), textColor);
         SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
         int textWidth = textSurface->w;
         int textHeight = textSurface->h;
-        double xPosition = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 + 140 + cos(5 - j) * 30;
-        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (5 - j) * 30 - 90;
+        double xPosition = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 + 140 + cos(j - 5) * 30;
+        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (j - 5) * 30 + 100;
         SDL_Rect renderQuad = {
             static_cast<int>(xPosition),
             static_cast<int>(yPosition),
@@ -178,11 +178,16 @@ void GUIClass::mainThread() {
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
 
         // Clear screen
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
+        #ifdef TESTING
+        setColor(color_black);
         SDL_RenderClear(renderer);
 
-        SDL_SetRenderDrawColor(renderer, 155, 0, 255, 0xFF);
-        drawCircle(240, 240, 240);
+        setColor(color_purple);
+        drawCircle(SCREEN_RADIUS, SCREEN_RADIUS, SCREEN_RADIUS);
+        #else
+        setColor(color_purple);
+        SDL_RenderClear(renderer);
+        #endif // TESTING
 
         for (int i = 0; i < menuItems.size(); ++i) {
             int lastDistance = std::abs(i - lastSelectedWord);
@@ -195,7 +200,7 @@ void GUIClass::mainThread() {
             TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, static_cast<int>(fontSize));
 
             SDL_Color textColor = {0, 0, 0, 0xFF};
-            SDL_Surface* textSurface = TTF_RenderText_Solid(tempFont, menuItems[i].data(), textColor);
+            SDL_Surface* textSurface = TTF_RenderText_Blended(tempFont, menuItems[i].data(), textColor);
             SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
             int textWidth = textSurface->w;
