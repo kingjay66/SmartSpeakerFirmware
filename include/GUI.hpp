@@ -4,6 +4,10 @@
 #include <array>
 #include <string_view>
 
+#ifndef PRODUCTION
+    #define TESTING
+#endif  // PRODUCTION
+
 struct SDLColor {
     Uint8 red = 0;
     Uint8 green = 0;
@@ -59,12 +63,16 @@ class GUIClass {
 
     void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
 
+#ifdef TESTING
     void eventHandling();
+#endif  // TESTING
 
     template<unsigned int i>
     void renderSubMenu(std::array<std::string_view, i> array, double t);
 
     void renderMainMenu(double t);
+
+    void animations();
 
   public:
     void init();

@@ -53,10 +53,33 @@ constexpr std::array<std::string_view, 3> eqMenuItems = {"Bass", "Mid", "High"};
 constexpr std::array<std::string_view, 3> otherMenuItems = {"Test", "Other", "Stuff"};
 constexpr std::array<std::string_view, 5> settingsMenuItems = {"Wi-Fi", "Bluetooth", "Sound", "Speakers", "About"};
 
+void GUIClass::animations() {
+    if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES) {
+        animationProgress++;
+    } else if (animationProgress > ANIMATION_FRAMES) {
+        lastMenuState = currentMenuState;
+        lastSettingsMenuSelectedWord = settingsMenuSelectedWord;
+        lastOtherMenuSelectedWord = settingsMenuSelectedWord;
+        lastEqMenuSelectedWord = eqMenuSelectedWord;
+        lastVideoMenuSelectedWord = videoMenuSelectedWord;
+        lastMusicMenuSelectedWord = musicMenuSelectedWord;
+        lastSelectedWord = selectedWord;
+        animationProgress = 0;
+        needRedraw = false;
+    } else {
+        needRedraw = false;
+    }
+}
+
+#ifdef TESTING
 void GUIClass::eventHandling() {
+
+    if (animationProgress > 0) {
+        return;
+    }
+
     SDL_Event e;
-    // Event handling
-    while (SDL_PollEvent(&e) != 0) {
+    if (SDL_WaitEvent(&e) != 0) {
         if (e.type == SDL_QUIT) {
             quit = true;
         } else if (e.type == SDL_KEYDOWN) {
@@ -187,6 +210,7 @@ void GUIClass::eventHandling() {
         }
     }
 }
+#endif  // TESTING
 
 GUIClass GUI = GUIClass();
 
@@ -232,16 +256,6 @@ void GUIClass::init() {
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
-
-#ifdef PRODUCTION
-    setColor(color_purple);
-    SDL_RenderClear(renderer);
-#else   // TESTING
-    setColor(color_black);
-    SDL_RenderClear(renderer);
-    setColor(color_purple);
-    drawCircle(SCREEN_RADIUS, SCREEN_RADIUS, SCREEN_RADIUS);
-#endif  // PRODUCTION
 }
 
 void GUIClass::renderMainMenu(double t) {
@@ -249,10 +263,10 @@ void GUIClass::renderMainMenu(double t) {
         int lastDistance = std::abs(i - lastSelectedWord);
         int currentDistance = std::abs(i - selectedWord);
 
-        double lastMinimization = lastMenuState == -1 ? 1 : 0.6;
-        double currentMinimization = currentMenuState == -1 ? 1 : 0.6;
-        double lastFontSize = MAX_FONT_SIZE - lastDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) * lastMinimization;
-        double currentFontSize = MAX_FONT_SIZE - currentDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) * currentMinimization;
+        double lastMinimization = lastMenuState == -1 ? 1 : -5;
+        double currentMinimization = currentMenuState == -1 ? 1 : -5;
+        double lastFontSize = MAX_FONT_SIZE - lastDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) + lastMinimization;
+        double currentFontSize = MAX_FONT_SIZE - currentDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) + currentMinimization;
 
         double fontSize = lerp(lastFontSize, currentFontSize, t);
         TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, static_cast<int>(fontSize));
@@ -309,22 +323,14 @@ void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t) {
         int textHeight = textSurface->h;
 
         double xPosition = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 + 140 + cos(j - 5) * 30;
-        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + 100;
-        if (currentMenuState != -1 || lastMenuState != -1) {
-            double lastOffsetX = lastMenuState == -1 ? 0 : -85;
-            double currentOffsetX = currentMenuState == -1 ? 0 : -85;
-            double lastXPosition = xPosition + lastOffsetX;
-            double currentXPosition = xPosition + currentOffsetX;
-            xPosition = lerp(lastXPosition, currentXPosition, t);
+        double lastOffsetX = lastMenuState == -1 ? 0 : -85;
+        double currentOffsetX = currentMenuState == -1 ? 0 : -85;
+        double lastXPosition = xPosition + lastOffsetX;
+        double currentXPosition = xPosition + currentOffsetX;
+        xPosition = lerp(lastXPosition, currentXPosition, t);
 
-            double lastOffsetY = lastMenuState == -1 ? 1 : 3;
-            double currentOffsetY = currentMenuState == -1 ? 1 : 3;
-            double lastYPosition = yPosition + (j - 5) * 30 * lastOffsetY;
-            double currentYPosition = yPosition + (j - 5) * 30 * currentOffsetY;
-            yPosition = lerp(lastOffsetY, currentOffsetY, t);
-        }
+        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (j - 2) * 40;
 
-        yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (j - 5) * 30 + 100;
         SDL_Rect renderQuad = {
             static_cast<int>(xPosition),
             static_cast<int>(yPosition),
@@ -343,13 +349,8 @@ void GUIClass::mainThread() {
 
 #ifdef TESTING
         eventHandling();
+        std::cout << "SCREEN UPDATE" << '\n';
 #endif  // TESTING
-
-        // TODO(jayadamsmorgan): handle events of SmartKnob in production
-
-        if (!needRedraw) {
-            continue;
-        }
 
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
 
@@ -383,27 +384,14 @@ void GUIClass::mainThread() {
             renderSubMenu<settingsMenuItems.size()>(settingsMenuItems, t);
         }
 
-        if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES) {
-            animationProgress++;
-        } else if (animationProgress > ANIMATION_FRAMES) {
-            lastMenuState = currentMenuState;
-            lastSettingsMenuSelectedWord = settingsMenuSelectedWord;
-            lastOtherMenuSelectedWord = settingsMenuSelectedWord;
-            lastEqMenuSelectedWord = eqMenuSelectedWord;
-            lastVideoMenuSelectedWord = videoMenuSelectedWord;
-            lastMusicMenuSelectedWord = musicMenuSelectedWord;
-            lastSelectedWord = selectedWord;
-            animationProgress = 0;
-            needRedraw = false;
-        }
+        animations();
 
         frameTime = SDL_GetTicks() - frameStart;
         if (FRAME_DELAY > frameTime) {
-            if (needRedraw) {
-                SDL_RenderPresent(renderer);
-            }
+            SDL_RenderPresent(renderer);
             SDL_Delay(FRAME_DELAY - frameTime);
         }
+        // TODO(jayadamsmorgan): handle events of SmartKnob in production
     }
 }
 
