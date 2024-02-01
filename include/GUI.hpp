@@ -26,12 +26,45 @@ class GUIClass {
     SDL_Renderer* renderer = nullptr;
     TTF_Font* font = nullptr;
 
+    bool quit = false;
+
+    Uint32 frameStart = 0;
+    uint32_t frameTime = 0;
+
+    bool needRedraw = true;
+
+    int animationProgress = 0;
+    int selectedWord = 0;
+    int lastSelectedWord = 0;
+
+    int musicMenuSelectedWord = 0;
+    int lastMusicMenuSelectedWord = 0;
+
+    int videoMenuSelectedWord = 0;
+    int lastVideoMenuSelectedWord = 0;
+
+    int eqMenuSelectedWord = 0;
+    int lastEqMenuSelectedWord = 0;
+
+    int otherMenuSelectedWord = 0;
+    int lastOtherMenuSelectedWord = 0;
+
+    int settingsMenuSelectedWord = 0;
+    int lastSettingsMenuSelectedWord = 0;
+
+    int lastMenuState = -1;
+    int currentMenuState = -1;
+
     void setColor(SDLColor color);
 
     void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
 
+    void eventHandling();
+
     template<unsigned int i>
-    void renderSubMenu(std::array<std::string_view, i> array, double t, int currentMenuState, int lastMenuState);
+    void renderSubMenu(std::array<std::string_view, i> array, double t);
+
+    void renderMainMenu(double t);
 
   public:
     void init();

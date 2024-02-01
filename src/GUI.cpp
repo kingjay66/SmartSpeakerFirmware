@@ -53,6 +53,141 @@ constexpr std::array<std::string_view, 3> eqMenuItems = {"Bass", "Mid", "High"};
 constexpr std::array<std::string_view, 3> otherMenuItems = {"Test", "Other", "Stuff"};
 constexpr std::array<std::string_view, 5> settingsMenuItems = {"Wi-Fi", "Bluetooth", "Sound", "Speakers", "About"};
 
+void GUIClass::eventHandling() {
+    SDL_Event e;
+    // Event handling
+    while (SDL_PollEvent(&e) != 0) {
+        if (e.type == SDL_QUIT) {
+            quit = true;
+        } else if (e.type == SDL_KEYDOWN) {
+            switch (e.key.keysym.sym) {
+                case SDLK_UP:
+                    switch (currentMenuState) {
+                        case 0:
+                            lastMusicMenuSelectedWord = musicMenuSelectedWord;
+                            if (musicMenuSelectedWord > 0) {
+                                musicMenuSelectedWord--;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 1:
+                            lastVideoMenuSelectedWord = videoMenuSelectedWord;
+                            if (lastVideoMenuSelectedWord > 0) {
+                                videoMenuSelectedWord--;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 2:
+                            lastEqMenuSelectedWord = eqMenuSelectedWord;
+                            if (eqMenuSelectedWord > 0) {
+                                eqMenuSelectedWord--;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 3:
+                            lastOtherMenuSelectedWord = otherMenuSelectedWord;
+                            if (otherMenuSelectedWord > 0) {
+                                otherMenuSelectedWord--;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 4:
+                            lastSettingsMenuSelectedWord = settingsMenuSelectedWord;
+                            if (settingsMenuSelectedWord > 0) {
+                                settingsMenuSelectedWord--;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        default:
+                            lastSelectedWord = selectedWord;
+                            if (selectedWord > 0) {
+                                selectedWord--;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                    }
+                    break;
+                case SDLK_DOWN:
+                    switch (currentMenuState) {
+                        case 0:
+                            lastMusicMenuSelectedWord = musicMenuSelectedWord;
+                            if (musicMenuSelectedWord < musicMenuItems.size() - 1) {
+                                musicMenuSelectedWord++;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 1:
+                            lastVideoMenuSelectedWord = videoMenuSelectedWord;
+                            if (videoMenuSelectedWord < videoMenuItems.size() - 1) {
+                                videoMenuSelectedWord++;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 2:
+                            lastEqMenuSelectedWord = eqMenuSelectedWord;
+                            if (eqMenuSelectedWord < eqMenuItems.size() - 1) {
+                                eqMenuSelectedWord++;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 3:
+                            lastOtherMenuSelectedWord = otherMenuSelectedWord;
+                            if (otherMenuSelectedWord < otherMenuItems.size() - 1) {
+                                otherMenuSelectedWord++;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        case 4:
+                            lastSettingsMenuSelectedWord = settingsMenuSelectedWord;
+                            if (settingsMenuSelectedWord < settingsMenuItems.size() - 1) {
+                                settingsMenuSelectedWord++;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                        default:
+                            lastSelectedWord = selectedWord;
+                            if (selectedWord < menuItems.size() - 1) {
+                                selectedWord++;
+                                needRedraw = true;
+                                animationProgress = 1;
+                            }
+                            break;
+                    }
+                    break;
+                case SDLK_RIGHT:
+                case SDLK_e:
+                    if (currentMenuState == -1) {
+                        needRedraw = true;
+                        lastMenuState = -1;
+                        currentMenuState = selectedWord;
+                        animationProgress = 1;
+                    }
+                    break;
+                case SDLK_LEFT:
+                case SDLK_ESCAPE:
+                    if (currentMenuState != -1) {
+                        needRedraw = true;
+                        lastMenuState = currentMenuState;
+                        currentMenuState = -1;
+                        animationProgress = 1;
+                        break;
+                    }
+            }
+        }
+    }
+}
+
 GUIClass GUI = GUIClass();
 
 double lerp(double start, double end, double t) {
@@ -109,8 +244,52 @@ void GUIClass::init() {
 #endif  // PRODUCTION
 }
 
+void GUIClass::renderMainMenu(double t) {
+    for (int i = 0; i < menuItems.size(); ++i) {
+        int lastDistance = std::abs(i - lastSelectedWord);
+        int currentDistance = std::abs(i - selectedWord);
+
+        double lastMinimization = lastMenuState == -1 ? 1 : 0.6;
+        double currentMinimization = currentMenuState == -1 ? 1 : 0.6;
+        double lastFontSize = MAX_FONT_SIZE - lastDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) * lastMinimization;
+        double currentFontSize = MAX_FONT_SIZE - currentDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) * currentMinimization;
+
+        double fontSize = lerp(lastFontSize, currentFontSize, t);
+        TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, static_cast<int>(fontSize));
+
+        SDL_Color textColor = {0, 0, 0, 0xFF};
+        SDL_Surface* textSurface = TTF_RenderText_Blended(tempFont, menuItems[i].data(), textColor);
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+        int textWidth = textSurface->w;
+        int textHeight = textSurface->h;
+
+        double lastOffsetX = lastMenuState == -1 ? 0 : -85;
+        double currentOffsetX = currentMenuState == -1 ? 0 : -85;
+        double lastX = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 - std::cos(lastDistance) * 60 + 50 + lastOffsetX;
+        double currentX = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 - std::cos(currentDistance) * 60 + 50 + currentOffsetX;
+        double xPosition = lerp(lastX, currentX, t);
+
+        double lastY = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (i - lastSelectedWord) * 80;
+        double currentY = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (i - selectedWord) * 80;
+        double yPosition = lerp(lastY, currentY, t);
+
+        SDL_Rect renderQuad = {
+            static_cast<int>(xPosition),
+            static_cast<int>(yPosition),
+            textWidth,
+            textHeight};
+
+        SDL_RenderCopy(renderer, textTexture, nullptr, &renderQuad);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+        TTF_CloseFont(tempFont);
+    }
+}
+
 template<unsigned int i>
-void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t, int currentMenuState, int lastMenuState) {
+void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t) {
     SDL_Color textColor = {0, 0, 0, 0xFF};
     for (int j = 0; j < array.size(); j++) {
         double fontSize = 0;
@@ -159,169 +338,14 @@ void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t, in
 }
 
 void GUIClass::mainThread() {
-    bool quit = false;
-    SDL_Event e;
-
-    Uint32 frameStart = 0;
-    uint32_t frameTime = 0;
-
-    bool needRedraw = true;
-
-    int animationProgress = 0;
-    int selectedWord = 0;
-    int lastSelectedWord = 0;
-
-    int musicMenuSelectedWord = 0;
-    int lastMusicMenuSelectedWord = 0;
-
-    int videoMenuSelectedWord = 0;
-    int lastVideoMenuSelectedWord = 0;
-
-    int eqMenuSelectedWord = 0;
-    int lastEqMenuSelectedWord = 0;
-
-    int otherMenuSelectedWord = 0;
-    int lastOtherMenuSelectedWord = 0;
-
-    int settingsMenuSelectedWord = 0;
-    int lastSettingsMenuSelectedWord = 0;
-
-    int lastMenuState = -1;
-    int currentMenuState = -1;
-
     while (!quit) {
         frameStart = SDL_GetTicks();
-        // Event handling
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) {
-                quit = true;
+
 #ifdef TESTING
-            } else if (e.type == SDL_KEYDOWN) {
-                switch (e.key.keysym.sym) {
-                    case SDLK_UP:
-                        switch (currentMenuState) {
-                            case 0:
-                                lastMusicMenuSelectedWord = musicMenuSelectedWord;
-                                if (musicMenuSelectedWord > 0) {
-                                    musicMenuSelectedWord--;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 1:
-                                lastVideoMenuSelectedWord = videoMenuSelectedWord;
-                                if (lastVideoMenuSelectedWord > 0) {
-                                    videoMenuSelectedWord--;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 2:
-                                lastEqMenuSelectedWord = eqMenuSelectedWord;
-                                if (eqMenuSelectedWord > 0) {
-                                    eqMenuSelectedWord--;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 3:
-                                lastOtherMenuSelectedWord = otherMenuSelectedWord;
-                                if (otherMenuSelectedWord > 0) {
-                                    otherMenuSelectedWord--;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 4:
-                                lastSettingsMenuSelectedWord = settingsMenuSelectedWord;
-                                if (settingsMenuSelectedWord > 0) {
-                                    settingsMenuSelectedWord--;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            default:
-                                lastSelectedWord = selectedWord;
-                                if (selectedWord > 0) {
-                                    selectedWord--;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                        }
-                        break;
-                    case SDLK_DOWN:
-                        switch (currentMenuState) {
-                            case 0:
-                                lastMusicMenuSelectedWord = musicMenuSelectedWord;
-                                if (musicMenuSelectedWord < musicMenuItems.size() - 1) {
-                                    musicMenuSelectedWord++;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 1:
-                                lastVideoMenuSelectedWord = videoMenuSelectedWord;
-                                if (videoMenuSelectedWord < videoMenuItems.size() - 1) {
-                                    videoMenuSelectedWord++;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 2:
-                                lastEqMenuSelectedWord = eqMenuSelectedWord;
-                                if (eqMenuSelectedWord < eqMenuItems.size() - 1) {
-                                    eqMenuSelectedWord++;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 3:
-                                lastOtherMenuSelectedWord = otherMenuSelectedWord;
-                                if (otherMenuSelectedWord < otherMenuItems.size() - 1) {
-                                    otherMenuSelectedWord++;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            case 4:
-                                lastSettingsMenuSelectedWord = settingsMenuSelectedWord;
-                                if (settingsMenuSelectedWord < settingsMenuItems.size() - 1) {
-                                    settingsMenuSelectedWord++;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                            default:
-                                lastSelectedWord = selectedWord;
-                                if (selectedWord < menuItems.size() - 1) {
-                                    selectedWord++;
-                                    needRedraw = true;
-                                    animationProgress = 1;
-                                }
-                                break;
-                        }
-                        break;
-                    case SDLK_e:
-                        if (currentMenuState == -1) {
-                            needRedraw = true;
-                            lastMenuState = -1;
-                            currentMenuState = selectedWord;
-                            animationProgress = 1;
-                        }
-                        break;
-                    case SDLK_ESCAPE:
-                        if (currentMenuState != -1) {
-                            needRedraw = true;
-                            lastMenuState = currentMenuState;
-                            currentMenuState = -1;
-                            animationProgress = 1;
-                            break;
-                        }
-                }
-#endif
-            }
-        }
+        eventHandling();
+#endif  // TESTING
+
+        // TODO(jayadamsmorgan): handle events of SmartKnob in production
 
         if (!needRedraw) {
             continue;
@@ -336,66 +360,27 @@ void GUIClass::mainThread() {
 
         setColor(color_purple);
         drawCircle(SCREEN_RADIUS, SCREEN_RADIUS, SCREEN_RADIUS);
-#else
+#else   // PRODUCTION
         setColor(color_purple);
         SDL_RenderClear(renderer);
 #endif  // TESTING
 
-        for (int i = 0; i < menuItems.size(); ++i) {
-            int lastDistance = std::abs(i - lastSelectedWord);
-            int currentDistance = std::abs(i - selectedWord);
+        renderMainMenu(t);
 
-            double lastMinimization = lastMenuState == -1 ? 1 : 0.6;
-            double currentMinimization = currentMenuState == -1 ? 1 : 0.6;
-            double lastFontSize = MAX_FONT_SIZE - lastDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) * lastMinimization;
-            double currentFontSize = MAX_FONT_SIZE - currentDistance * (MAX_FONT_SIZE - MIN_FONT_SIZE) / (menuItems.size() / 1.5) * currentMinimization;
-
-            double fontSize = lerp(lastFontSize, currentFontSize, t);
-            TTF_Font* tempFont = TTF_OpenFont(FONT_PATH, static_cast<int>(fontSize));
-
-            SDL_Color textColor = {0, 0, 0, 0xFF};
-            SDL_Surface* textSurface = TTF_RenderText_Blended(tempFont, menuItems[i].data(), textColor);
-            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-            int textWidth = textSurface->w;
-            int textHeight = textSurface->h;
-
-            double lastOffsetX = lastMenuState == -1 ? 0 : -85;
-            double currentOffsetX = currentMenuState == -1 ? 0 : -85;
-            double lastX = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 - std::cos(lastDistance) * 60 + 50 + lastOffsetX;
-            double currentX = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 - std::cos(currentDistance) * 60 + 50 + currentOffsetX;
-            double xPosition = lerp(lastX, currentX, t);
-
-            double lastY = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (i - lastSelectedWord) * 80;
-            double currentY = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (i - selectedWord) * 80;
-            double yPosition = lerp(lastY, currentY, t);
-
-            SDL_Rect renderQuad = {
-                static_cast<int>(xPosition),
-                static_cast<int>(yPosition),
-                textWidth,
-                textHeight};
-
-            SDL_RenderCopy(renderer, textTexture, nullptr, &renderQuad);
-
-            SDL_FreeSurface(textSurface);
-            SDL_DestroyTexture(textTexture);
-            TTF_CloseFont(tempFont);
-        }
         if (selectedWord == 0) {  // MUSIC
-            renderSubMenu<musicMenuItems.size()>(musicMenuItems, t, currentMenuState, lastMenuState);
+            renderSubMenu<musicMenuItems.size()>(musicMenuItems, t);
         }
         if (selectedWord == 1) {  // VIDEO
-            renderSubMenu<videoMenuItems.size()>(videoMenuItems, t, currentMenuState, lastMenuState);
+            renderSubMenu<videoMenuItems.size()>(videoMenuItems, t);
         }
         if (selectedWord == 2) {  // EQ
-            renderSubMenu<eqMenuItems.size()>(eqMenuItems, t, currentMenuState, lastMenuState);
+            renderSubMenu<eqMenuItems.size()>(eqMenuItems, t);
         }
         if (selectedWord == 3) {  // OTHER
-            renderSubMenu<otherMenuItems.size()>(otherMenuItems, t, currentMenuState, lastMenuState);
+            renderSubMenu<otherMenuItems.size()>(otherMenuItems, t);
         }
         if (selectedWord == 4) {  // SETTINGS
-            renderSubMenu<settingsMenuItems.size()>(settingsMenuItems, t, currentMenuState, lastMenuState);
+            renderSubMenu<settingsMenuItems.size()>(settingsMenuItems, t);
         }
 
         if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES) {
