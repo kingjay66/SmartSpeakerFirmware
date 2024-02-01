@@ -31,7 +31,7 @@ class GUIClass {
     void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
 
     template<unsigned int i>
-    void renderSubMenu(std::array<std::string_view, i> array);
+    void renderSubMenu(std::array<std::string_view, i> array, double t, int currentMenuState, int lastMenuState);
 
   public:
     void init();
