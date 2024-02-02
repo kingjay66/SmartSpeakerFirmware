@@ -29,6 +29,8 @@ include_directories(include)
 # Add the source files
 add_executable(ssf
     src/GUI.cpp
+    src/MusicPlayerGUI.cpp
+    src/MusicPlayer.cpp
     src/Main.cpp
     src/User.cpp
     src/Speaker.cpp

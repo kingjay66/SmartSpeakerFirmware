@@ -6,45 +6,6 @@
 #include <array>
 #include <iostream>
 
-#ifndef PRODUCTION
-    #define TESTING
-#endif  // PRODUCTION
-
-#define SCREEN_RADIUS 240
-
-#define WINDOW_WIDTH SCREEN_RADIUS * 2
-#define WINDOW_HEIGHT SCREEN_RADIUS * 2
-
-#ifdef FB_EN
-    #define SDL_WINDOW_TYPE SDL_WINDOW_FULLSCREEN
-#else
-    #define SDL_WINDOW_TYPE SDL_WINDOW_OPENGL
-#endif  // FB_EN
-
-#ifndef MAX_FONT_SIZE
-    #define MAX_FONT_SIZE 32
-#endif  // MAX_FONT_SIZE
-
-#ifndef MIN_FONT_SIZE
-    #define MIN_FONT_SIZE 12
-#endif  // MIN_FONT_SIZE
-
-#if MAX_FONT_SIZE < MIN_FONT_SIZE
-    #error MAX_FONT_SIZE has to be greater than MIN_FONT_SIZE
-#endif  // MAX_FONT_SIZE < MIN_FONT_SIZE
-
-#ifndef FONT_PATH
-    #define FONT_PATH "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"
-#endif  // FONT_PATH
-
-#ifndef FPS
-    #define FPS 60.0
-#endif  // FPS
-
-#define FRAME_DELAY 1000.0 / FPS
-
-#define ANIMATION_FRAMES FPS / 6.0
-
 constexpr std::array<std::string_view, 5> menuItems = {"Music", "Videos", "Equalizer", "Other", "Settings"};
 
 constexpr std::array<std::string_view, 5> musicMenuItems = {"Play", "Pause", "Next", "Previous", "Stop"};
@@ -73,7 +34,6 @@ void GUIClass::animations() {
 
 #ifdef TESTING
 void GUIClass::eventHandling() {
-
     if (animationProgress > 0) {
         return;
     }
@@ -351,6 +311,7 @@ void GUIClass::mainThread() {
         eventHandling();
         std::cout << "SCREEN UPDATE" << '\n';
 #endif  // TESTING
+        // TODO(jayadamsmorgan): handle events of SmartKnob in production
 
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
 
@@ -391,7 +352,6 @@ void GUIClass::mainThread() {
             SDL_RenderPresent(renderer);
             SDL_Delay(FRAME_DELAY - frameTime);
         }
-        // TODO(jayadamsmorgan): handle events of SmartKnob in production
     }
 }
 

@@ -8,6 +8,41 @@
     #define TESTING
 #endif  // PRODUCTION
 
+#define SCREEN_RADIUS 240
+
+#define WINDOW_WIDTH SCREEN_RADIUS * 2
+#define WINDOW_HEIGHT SCREEN_RADIUS * 2
+
+#ifdef FB_EN
+    #define SDL_WINDOW_TYPE SDL_WINDOW_FULLSCREEN
+#else
+    #define SDL_WINDOW_TYPE SDL_WINDOW_OPENGL
+#endif  // FB_EN
+
+#ifndef MAX_FONT_SIZE
+    #define MAX_FONT_SIZE 32
+#endif  // MAX_FONT_SIZE
+
+#ifndef MIN_FONT_SIZE
+    #define MIN_FONT_SIZE 12
+#endif  // MIN_FONT_SIZE
+
+#if MAX_FONT_SIZE < MIN_FONT_SIZE
+    #error MAX_FONT_SIZE has to be greater than MIN_FONT_SIZE
+#endif  // MAX_FONT_SIZE < MIN_FONT_SIZE
+
+#ifndef FONT_PATH
+    #define FONT_PATH "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"
+#endif  // FONT_PATH
+
+#ifndef FPS
+    #define FPS 60.0
+#endif  // FPS
+
+#define FRAME_DELAY 1000.0 / FPS
+
+#define ANIMATION_FRAMES FPS / 6.0
+
 struct SDLColor {
     Uint8 red = 0;
     Uint8 green = 0;
@@ -25,10 +60,8 @@ constexpr SDLColor color_black = {};
 constexpr SDLColor color_purple = {.red = 155, .blue = 255};
 
 class GUIClass {
-  private:
-    SDL_Window* window = nullptr;
+  protected:
     SDL_Renderer* renderer = nullptr;
-    TTF_Font* font = nullptr;
 
     bool quit = false;
 
@@ -38,6 +71,17 @@ class GUIClass {
     bool needRedraw = true;
 
     int animationProgress = 0;
+
+    void setColor(SDLColor color);
+
+    void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
+
+    void animations();
+
+  private:
+    SDL_Window* window = nullptr;
+    TTF_Font* font = nullptr;
+
     int selectedWord = 0;
     int lastSelectedWord = 0;
 
@@ -59,10 +103,6 @@ class GUIClass {
     int lastMenuState = -1;
     int currentMenuState = -1;
 
-    void setColor(SDLColor color);
-
-    void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
-
 #ifdef TESTING
     void eventHandling();
 #endif  // TESTING
@@ -71,8 +111,6 @@ class GUIClass {
     void renderSubMenu(std::array<std::string_view, i> array, double t);
 
     void renderMainMenu(double t);
-
-    void animations();
 
   public:
     void init();
