@@ -1,5 +1,9 @@
 #include <MusicPlayer.hpp>
 
+#ifndef PRODUCTION
+    #define TESTING
+#endif  // PRODUCTION
+
 MusicPlayerClass MP = MusicPlayerClass();
 
 MusicPlayerClass::MusicPlayerClass()
@@ -56,14 +60,15 @@ bool MusicPlayerClass::stop() {
 }
 
 bool MusicPlayerClass::toggle() {
-    if (stream == nullptr) {
-        return false;
-    }
-    if (state == PLAYER_STATE_PLAYING) {
-        return stop();
-    }
-    if (state == PLAYER_STATE_NOT_PLAYING || state == PLAYER_STATE_PAUSED) {
+#ifdef PRODUCTION
+    if (state == PLAYER_STATE_NOT_PLAYING) {
         return play();
     }
-    return false;
+#endif  // PRODUCTION
+    if (state == PLAYER_STATE_PLAYING) {
+        state = PLAYER_STATE_PAUSED;
+        return true;
+    }
+    state = PLAYER_STATE_PLAYING;
+    return true;
 }

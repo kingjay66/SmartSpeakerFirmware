@@ -40,7 +40,7 @@ void PlayerGUIClass::renderPlayerGUI() {
         SDL_Rect rect = {
             .x = static_cast<int>(x1),
             .y = static_cast<int>(playButtonPosY),
-            .w = PLAY_BTN_WIDTH,
+            .w = PLAY_BTN_WIDTH / 2,
             .h = PLAY_BTN_HEIGHT};
         SDL_RenderDrawRect(renderer, &rect);
         x1 = playButtonPosX + PLAY_BTN_WIDTH / 2.0;

@@ -1,6 +1,6 @@
 #pragma once
 
-enum MusicPlayerSource {
+enum MediaPlayerSource {
     PLAYER_SOURCE_NONE,
     PLAYER_SOURCE_SDCARD,
     PLAYER_SOURCE_USB,
@@ -8,7 +8,7 @@ enum MusicPlayerSource {
     PLAYER_SOURCE_YOUTUBE,
 };
 
-enum MusicPlayerState {
+enum MediaPlayerState {
     PLAYER_STATE_NOT_PLAYING,
     PLAYER_STATE_PLAYING,
     PLAYER_STATE_PAUSED,
@@ -18,13 +18,13 @@ enum MusicPlayerState {
 
 class MusicPlayerStream {
   public:
-    MusicPlayerSource source = PLAYER_SOURCE_NONE;
+    MediaPlayerSource source = PLAYER_SOURCE_NONE;
 };
 
 class MusicPlayerClass {
   private:
+    MediaPlayerState state = PLAYER_STATE_NOT_PLAYING;
     MusicPlayerStream* stream;
-    MusicPlayerState state = PLAYER_STATE_NOT_PLAYING;
 
   public:
 
@@ -35,7 +35,7 @@ class MusicPlayerClass {
     MusicPlayerClass& operator=(MusicPlayerClass&&) = delete;
     ~MusicPlayerClass();
 
-    MusicPlayerState getState();
+    MediaPlayerState getState();
 
     bool play();
     bool play(MusicPlayerStream* stream);
