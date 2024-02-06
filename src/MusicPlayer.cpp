@@ -1,10 +1,20 @@
 #include <MusicPlayer.hpp>
 
-PlayerClass::PlayerClass()
+MusicPlayerClass MP = MusicPlayerClass();
+
+MusicPlayerClass::MusicPlayerClass()
   : stream(nullptr) {
 }
 
-bool PlayerClass::play() {
+MusicPlayerClass::~MusicPlayerClass() {
+    delete stream;
+}
+
+MusicPlayerState MusicPlayerClass::getState() {
+    return state;
+}
+
+bool MusicPlayerClass::play() {
     if (stream == nullptr) {
         return false;
     }
@@ -14,7 +24,7 @@ bool PlayerClass::play() {
     return true;
 }
 
-bool PlayerClass::play(PlayerStream* stream) {
+bool MusicPlayerClass::play(MusicPlayerStream* stream) {
     if (stream == nullptr) {
         return false;
     }
@@ -23,7 +33,7 @@ bool PlayerClass::play(PlayerStream* stream) {
     return true;
 }
 
-bool PlayerClass::pause() {
+bool MusicPlayerClass::pause() {
     if (stream == nullptr) {
         return false;
     }
@@ -34,7 +44,7 @@ bool PlayerClass::pause() {
     return false;
 }
 
-bool PlayerClass::stop() {
+bool MusicPlayerClass::stop() {
     if (stream == nullptr) {
         return false;
     }
@@ -45,7 +55,7 @@ bool PlayerClass::stop() {
     return false;
 }
 
-bool PlayerClass::toggle() {
+bool MusicPlayerClass::toggle() {
     if (stream == nullptr) {
         return false;
     }

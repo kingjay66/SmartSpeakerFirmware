@@ -1,3 +1,4 @@
+#include "MusicPlayerGUI.hpp"
 #include <GUI.hpp>
 
 #include <SDL2/SDL.h>
@@ -155,6 +156,12 @@ void GUIClass::eventHandling() {
                         lastMenuState = -1;
                         currentMenuState = selectedWord;
                         animationProgress = 1;
+                        break;
+                    }
+                    if (musicMenuSelectedWord == 0) {
+                        PlayerGUI.mainThread(renderer);
+                        needRedraw = true;
+                        animationProgress = 1;
                     }
                     break;
                 case SDLK_LEFT:
@@ -291,6 +298,42 @@ void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t) {
 
         double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (j - 2) * 40;
 
+        if (currentMenuState != -1) {
+            SDL_Rect highlightRect = {.x = static_cast<int>(xPosition - 10),
+                                      .y = static_cast<int>(yPosition - 3),
+                                      .w = textWidth + 20,
+                                      .h = textHeight + 10};
+            setColor(color_white);
+            switch (currentMenuState) {
+                case 0:
+                    if (j == musicMenuSelectedWord) {
+                        SDL_RenderDrawRect(renderer, &highlightRect);
+                    }
+                    break;
+                case 1:
+                    if (j == videoMenuSelectedWord) {
+                        SDL_RenderDrawRect(renderer, &highlightRect);
+                    }
+                    break;
+                case 2:
+                    if (j == eqMenuSelectedWord) {
+                        SDL_RenderDrawRect(renderer, &highlightRect);
+                    }
+                    break;
+                case 3:
+                    if (j == otherMenuSelectedWord) {
+                        SDL_RenderDrawRect(renderer, &highlightRect);
+                    }
+                    break;
+                case 4:
+                    if (j == settingsMenuSelectedWord) {
+                        SDL_RenderDrawRect(renderer, &highlightRect);
+                    }
+                    break;
+            }
+            setColor(color_black);
+        }
+
         SDL_Rect renderQuad = {
             static_cast<int>(xPosition),
             static_cast<int>(yPosition),
@@ -310,8 +353,8 @@ void GUIClass::mainThread() {
 #ifdef TESTING
         eventHandling();
         std::cout << "SCREEN UPDATE" << '\n';
-#endif  // TESTING
-        // TODO(jayadamsmorgan): handle events of SmartKnob in production
+#endif  // TESTING \
+    // TODO(jayadamsmorgan): handle events of SmartKnob in production
 
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
 

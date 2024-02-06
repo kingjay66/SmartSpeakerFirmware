@@ -1,9 +1,11 @@
+#include <MusicPlayer.hpp>
 #include <MusicPlayerGUI.hpp>
 #include <iostream>
 
-PlayerGUIClass::PlayerGUIClass(SDL_Renderer* renderer) {
-    this->renderer = renderer;
-}
+#define PLAY_BTN_WIDTH 40
+#define PLAY_BTN_HEIGHT 40
+
+PlayerGUIClass PlayerGUI = PlayerGUIClass();
 
 void PlayerGUIClass::eventHandling() {
     if (animationProgress > 0) {
@@ -19,6 +21,9 @@ void PlayerGUIClass::eventHandling() {
                     quit = true;
                     break;
                 case SDLK_p:
+                    MP.toggle();
+                    needRedraw = true;
+                    animationProgress = 1;
                     break;
             }
         }
@@ -26,10 +31,42 @@ void PlayerGUIClass::eventHandling() {
 }
 
 void PlayerGUIClass::renderPlayerGUI() {
-
+    double playButtonPosX = static_cast<double>(WINDOW_WIDTH) / 2;
+    double playButtonPosY = static_cast<double>(WINDOW_HEIGHT) / 2;
+    setColor(color_black);
+    if (MP.getState() == PLAYER_STATE_PLAYING) {
+        // PAUSE BUTTON
+        double x1 = playButtonPosX - PLAY_BTN_WIDTH / 2.0;
+        SDL_Rect rect = {
+            .x = static_cast<int>(x1),
+            .y = static_cast<int>(playButtonPosY),
+            .w = PLAY_BTN_WIDTH,
+            .h = PLAY_BTN_HEIGHT};
+        SDL_RenderDrawRect(renderer, &rect);
+        x1 = playButtonPosX + PLAY_BTN_WIDTH / 2.0;
+        rect.x = static_cast<int>(x1);
+        SDL_RenderDrawRect(renderer, &rect);
+    } else {
+        // PLAY BUTTON
+        double x1 = playButtonPosX - PLAY_BTN_WIDTH / 2.0;
+        double y1 = playButtonPosY - PLAY_BTN_HEIGHT / 2.0;
+        double x2 = playButtonPosX + PLAY_BTN_WIDTH / 2.0;
+        double y2 = playButtonPosY;
+        double x3 = x1;
+        double y3 = playButtonPosY + PLAY_BTN_HEIGHT / 2.0;
+        SDL_RenderDrawLine(renderer, static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+        SDL_RenderDrawLine(renderer, static_cast<int>(x2), static_cast<int>(y2), static_cast<int>(x3), static_cast<int>(y3));
+        SDL_RenderDrawLine(renderer, static_cast<int>(x3), static_cast<int>(y3), static_cast<int>(x1), static_cast<int>(y1));
+    }
 }
 
-void PlayerGUIClass::mainThread() {
+void PlayerGUIClass::mainThread(SDL_Renderer* renderer) {
+    if (this->renderer == nullptr) {
+        this->renderer = renderer;
+    }
+    needRedraw = true;
+    animationProgress = 1;
+    quit = false;
     while (!quit) {
         frameStart = SDL_GetTicks();
 
@@ -51,8 +88,9 @@ void PlayerGUIClass::mainThread() {
         setColor(color_purple);
         SDL_RenderClear(renderer);
 #endif  // TESTING
-        
 
+        renderPlayerGUI();
+        
         animations();
         frameTime = SDL_GetTicks() - frameStart;
         if (FRAME_DELAY > frameTime) {

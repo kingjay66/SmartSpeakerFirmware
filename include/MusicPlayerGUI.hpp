@@ -10,9 +10,8 @@ class PlayerGUIClass : GUIClass {
     void eventHandling();
     void renderPlayerGUI();
   public:
-    PlayerGUIClass(SDL_Renderer* renderer);
 
-    void mainThread();
+    void mainThread(SDL_Renderer* renderer);
 };
 
 extern PlayerGUIClass PlayerGUI;
