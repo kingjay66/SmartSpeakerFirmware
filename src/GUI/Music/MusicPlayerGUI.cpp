@@ -1,13 +1,13 @@
-#include <MusicPlayer.hpp>
-#include <MusicPlayerGUI.hpp>
+#include <GUI/Music/MusicPlayer.hpp>
+#include <GUI/Music/MusicPlayerGUI.hpp>
 #include <iostream>
 
 #define PLAY_BTN_WIDTH 40
 #define PLAY_BTN_HEIGHT 40
 
-PlayerGUIClass PlayerGUI = PlayerGUIClass();
+MusicPlayerGUIClass MusicPlayerGUI = MusicPlayerGUIClass();
 
-void PlayerGUIClass::eventHandling() {
+void MusicPlayerGUIClass::eventHandling() {
     if (animationProgress > 0) {
         return;
     }
@@ -30,7 +30,7 @@ void PlayerGUIClass::eventHandling() {
     }
 }
 
-void PlayerGUIClass::renderPlayerGUI() {
+void MusicPlayerGUIClass::renderPlayerGUI() {
     double playButtonPosX = static_cast<double>(WINDOW_WIDTH) / 2;
     double playButtonPosY = static_cast<double>(WINDOW_HEIGHT) / 2;
     setColor(color_black);
@@ -60,7 +60,7 @@ void PlayerGUIClass::renderPlayerGUI() {
     }
 }
 
-void PlayerGUIClass::mainThread(SDL_Renderer* renderer) {
+void MusicPlayerGUIClass::mainThread(SDL_Renderer* renderer) {
     if (this->renderer == nullptr) {
         this->renderer = renderer;
     }

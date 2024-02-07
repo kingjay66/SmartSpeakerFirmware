@@ -1,6 +1,6 @@
-#include <GUI.hpp>
-#include <NetworkService.hpp>
-#include <User.hpp>
+#include <GUI/GUI.hpp>
+#include <Services/NetworkService.hpp>
+#include <Models/User.hpp>
 
 #include <iostream>
 #include <thread>

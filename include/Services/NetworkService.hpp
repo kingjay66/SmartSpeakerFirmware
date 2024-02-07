@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Settings.hpp>
-#include <Speaker.hpp>
-#include <User.hpp>
+#include <Models/Settings.hpp>
+#include <Models/Speaker.hpp>
+#include <Models/User.hpp>
 #include <functional>
 #include <string>
 

@@ -1,4 +1,4 @@
-#include <MusicPlayer.hpp>
+#include <GUI/Music/MusicPlayer.hpp>
 
 #ifndef PRODUCTION
     #define TESTING
@@ -14,7 +14,7 @@ MusicPlayerClass::~MusicPlayerClass() {
     delete stream;
 }
 
-MusicPlayerState MusicPlayerClass::getState() {
+MediaPlayerState MusicPlayerClass::getState() {
     return state;
 }
 

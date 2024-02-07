@@ -28,15 +28,17 @@ include_directories(include)
 
 # Add the source files
 add_executable(ssf
-    src/GUI.cpp
-    src/MusicPlayerGUI.cpp
-    src/MusicPlayer.cpp
     src/Main.cpp
-    src/User.cpp
-    src/Speaker.cpp
-    src/Settings.cpp
-    src/NetworkService.cpp
-    src/SettingsService.cpp
+    src/GUI/GUI.cpp
+    src/GUI/Music/MusicPlayerGUI.cpp
+    src/GUI/Music/MusicPlayer.cpp
+    src/GUI/Video/VideoPlayerGUI.cpp
+    src/GUI/Video/VideoPlayer.cpp
+    src/Models/User.cpp
+    src/Models/Speaker.cpp
+    src/Models/Settings.cpp
+    src/Services/NetworkService.cpp
+    src/Services/SettingsService.cpp
 )
 
 # Link libraries

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Settings.hpp>
+#include <Models/Settings.hpp>
 
 class SettingsServiceClass {
   private:

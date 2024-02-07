@@ -1,7 +1,7 @@
-#include <NetworkService.hpp>
+#include <Services/NetworkService.hpp>
 
 #include <curl/curl.h>
-#include <json.hpp>
+#include <JSON/json.hpp>
 #include <string>
 #include <thread>
 

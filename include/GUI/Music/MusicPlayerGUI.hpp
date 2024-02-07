@@ -1,17 +1,15 @@
 #pragma once
 
-#include <GUI.hpp>
+#include <GUI/GUI.hpp>
 #include <SDL2/SDL.h>
 
-class PlayerGUIClass : GUIClass {
+class MusicPlayerGUIClass : GUIClass {
   private:
-    bool play = false;
-
     void eventHandling();
     void renderPlayerGUI();
-  public:
 
+  public:
     void mainThread(SDL_Renderer* renderer);
 };
 
-extern PlayerGUIClass PlayerGUI;
+extern MusicPlayerGUIClass MusicPlayerGUI;

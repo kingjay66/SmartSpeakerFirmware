@@ -1,5 +1,5 @@
-#include "MusicPlayerGUI.hpp"
-#include <GUI.hpp>
+#include <GUI/Music/MusicPlayerGUI.hpp>
+#include <GUI/GUI.hpp>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -159,7 +159,7 @@ void GUIClass::eventHandling() {
                         break;
                     }
                     if (musicMenuSelectedWord == 0) {
-                        PlayerGUI.mainThread(renderer);
+                        MusicPlayerGUI.mainThread(renderer);
                         needRedraw = true;
                         animationProgress = 1;
                     }
