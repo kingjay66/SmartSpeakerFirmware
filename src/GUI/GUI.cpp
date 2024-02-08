@@ -272,7 +272,8 @@ void GUIClass::renderMainMenu(double t) {
 template<unsigned int i>
 void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t) {
     SDL_Color textColor = {0, 0, 0, 0xFF};
-    for (int j = 0; j < array.size(); j++) {
+    int arraySize = static_cast<int>(array.size());
+    for (int j = 0; j < arraySize; j++) {
         double fontSize = 0;
         if (currentMenuState != -1) {
             double lastMinimization = lastMenuState == -1 ? 0 : 5;
@@ -289,14 +290,14 @@ void GUIClass::renderSubMenu(std::array<std::string_view, i> array, double t) {
         int textWidth = textSurface->w;
         int textHeight = textSurface->h;
 
-        double xPosition = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 + 140 + cos(j - 5) * 30;
+        double xPosition = static_cast<double>(WINDOW_WIDTH - textWidth) / 2 + 140 - cos(j - std::floor(arraySize / 2.0)) * 30;
         double lastOffsetX = lastMenuState == -1 ? 0 : -85;
         double currentOffsetX = currentMenuState == -1 ? 0 : -85;
         double lastXPosition = xPosition + lastOffsetX;
         double currentXPosition = xPosition + currentOffsetX;
         xPosition = lerp(lastXPosition, currentXPosition, t);
 
-        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (j - 2) * 40;
+        double yPosition = static_cast<double>(WINDOW_HEIGHT - textHeight) / 2 + (j - std::floor(arraySize / 2.0)) * (textHeight + 20);
 
         if (currentMenuState != -1) {
             SDL_Rect highlightRect = {.x = static_cast<int>(xPosition - 10),

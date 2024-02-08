@@ -85,20 +85,20 @@ class GUIClass {
     int selectedWord = 0;
     int lastSelectedWord = 0;
 
-    int musicMenuSelectedWord = 0;
-    int lastMusicMenuSelectedWord = 0;
+    int musicMenuSelectedWord = 2;
+    int lastMusicMenuSelectedWord = 2;
 
-    int videoMenuSelectedWord = 0;
-    int lastVideoMenuSelectedWord = 0;
+    int videoMenuSelectedWord = 1;
+    int lastVideoMenuSelectedWord = 1;
 
-    int eqMenuSelectedWord = 0;
-    int lastEqMenuSelectedWord = 0;
+    int eqMenuSelectedWord = 1;
+    int lastEqMenuSelectedWord = 1;
 
-    int otherMenuSelectedWord = 0;
-    int lastOtherMenuSelectedWord = 0;
+    int otherMenuSelectedWord = 1;
+    int lastOtherMenuSelectedWord = 1;
 
-    int settingsMenuSelectedWord = 0;
-    int lastSettingsMenuSelectedWord = 0;
+    int settingsMenuSelectedWord = 2;
+    int lastSettingsMenuSelectedWord = 2;
 
     int lastMenuState = -1;
     int currentMenuState = -1;
