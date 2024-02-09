@@ -45,6 +45,9 @@ class MusicPlayerClass {
     bool stop();
 
     bool toggle();
+
+    bool prev();
+    bool next();
 };
 
 extern MusicPlayerClass MP;

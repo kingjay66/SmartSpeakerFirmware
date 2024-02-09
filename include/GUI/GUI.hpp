@@ -74,6 +74,8 @@ class GUIClass {
 
     void setColor(SDLColor color);
 
+    void clearScreen();
+
     void drawCircle(int32_t centerX, int32_t centerY, int32_t radius);
 
     void animations();

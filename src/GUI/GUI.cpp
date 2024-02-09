@@ -1,5 +1,6 @@
-#include <GUI/Music/MusicPlayerGUI.hpp>
+#include "GUI/Music/MusicPlayer.hpp"
 #include <GUI/GUI.hpp>
+#include <GUI/Music/MusicPlayerGUI.hpp>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -14,6 +15,20 @@ constexpr std::array<std::string_view, 3> videoMenuItems = {"Files", "YouTube", 
 constexpr std::array<std::string_view, 3> eqMenuItems = {"Bass", "Mid", "High"};
 constexpr std::array<std::string_view, 3> otherMenuItems = {"Test", "Other", "Stuff"};
 constexpr std::array<std::string_view, 5> settingsMenuItems = {"Wi-Fi", "Bluetooth", "Sound", "Speakers", "About"};
+
+void GUIClass::clearScreen() {
+// Clear screen
+#ifdef TESTING
+    setColor(color_black);
+    SDL_RenderClear(renderer);
+
+    setColor(color_purple);
+    drawCircle(SCREEN_RADIUS, SCREEN_RADIUS, SCREEN_RADIUS);
+#else   // PRODUCTION
+    setColor(color_purple);
+    SDL_RenderClear(renderer);
+#endif  // TESTING
+}
 
 void GUIClass::animations() {
     if (animationProgress > 0 && animationProgress <= ANIMATION_FRAMES) {
@@ -150,7 +165,6 @@ void GUIClass::eventHandling() {
                     }
                     break;
                 case SDLK_RIGHT:
-                case SDLK_e:
                     if (currentMenuState == -1) {
                         needRedraw = true;
                         lastMenuState = -1;
@@ -158,7 +172,32 @@ void GUIClass::eventHandling() {
                         animationProgress = 1;
                         break;
                     }
-                    if (musicMenuSelectedWord == 0) {
+                    break;
+                case SDLK_e:
+                    if (selectedWord == 0 && currentMenuState == -1) {  // Music Main Menu
+                        MusicPlayerGUI.mainThread(renderer);
+                        needRedraw = true;
+                        animationProgress = 1;
+                        break;
+                    }
+                    if (currentMenuState == 0) {  // Music Menu selected
+                        switch (musicMenuSelectedWord) {
+                            case 0:  // Music -> Play
+                                MP.play();
+                                break;
+                            case 1:  // Music -> Pause
+                                MP.pause();
+                                break;
+                            case 2:  // Music -> Next
+                                MP.next();
+                                break;
+                            case 3:  // Music -> Previous
+                                MP.prev();
+                                break;
+                            case 4:  // Music -> Stop
+                                MP.stop();
+                                break;
+                        }
                         MusicPlayerGUI.mainThread(renderer);
                         needRedraw = true;
                         animationProgress = 1;
@@ -359,17 +398,7 @@ void GUIClass::mainThread() {
 
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
 
-// Clear screen
-#ifdef TESTING
-        setColor(color_black);
-        SDL_RenderClear(renderer);
-
-        setColor(color_purple);
-        drawCircle(SCREEN_RADIUS, SCREEN_RADIUS, SCREEN_RADIUS);
-#else   // PRODUCTION
-        setColor(color_purple);
-        SDL_RenderClear(renderer);
-#endif  // TESTING
+        clearScreen();
 
         renderMainMenu(t);
 

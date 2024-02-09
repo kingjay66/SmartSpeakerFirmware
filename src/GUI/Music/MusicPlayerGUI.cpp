@@ -77,17 +77,7 @@ void MusicPlayerGUIClass::mainThread(SDL_Renderer* renderer) {
 
         double t = static_cast<double>(animationProgress) / static_cast<double>(ANIMATION_FRAMES);
 
-// Clear screen
-#ifdef TESTING
-        setColor(color_black);
-        SDL_RenderClear(renderer);
-
-        setColor(color_purple);
-        drawCircle(SCREEN_RADIUS, SCREEN_RADIUS, SCREEN_RADIUS);
-#else   // PRODUCTION
-        setColor(color_purple);
-        SDL_RenderClear(renderer);
-#endif  // TESTING
+        clearScreen();
 
         renderPlayerGUI();
         

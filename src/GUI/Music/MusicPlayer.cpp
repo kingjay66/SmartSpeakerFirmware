@@ -19,9 +19,11 @@ MediaPlayerState MusicPlayerClass::getState() {
 }
 
 bool MusicPlayerClass::play() {
+#ifdef PRODUCTION
     if (stream == nullptr) {
         return false;
     }
+#endif  // PRODUCTION
     if (this->state == PLAYER_STATE_PAUSED) {
         this->state = PLAYER_STATE_PLAYING;
     }
@@ -29,18 +31,22 @@ bool MusicPlayerClass::play() {
 }
 
 bool MusicPlayerClass::play(MusicPlayerStream* stream) {
+#ifdef PRODUCTION
     if (stream == nullptr) {
         return false;
     }
+#endif  // PRODUCTION
     this->stream = stream;
     this->state = PLAYER_STATE_PLAYING;
     return true;
 }
 
 bool MusicPlayerClass::pause() {
+#ifdef PRODUCTION
     if (stream == nullptr) {
         return false;
     }
+#endif  // PRODUCTION
     if (state == PLAYER_STATE_PLAYING) {
         state = PLAYER_STATE_PAUSED;
         return true;
@@ -49,9 +55,11 @@ bool MusicPlayerClass::pause() {
 }
 
 bool MusicPlayerClass::stop() {
+#ifdef PRODUCTION
     if (stream == nullptr) {
         return false;
     }
+#endif  // PRODUCTION
     if (state == PLAYER_STATE_PLAYING || state == PLAYER_STATE_PAUSED) {
         state = PLAYER_STATE_NOT_PLAYING;
         return true;
@@ -71,4 +79,12 @@ bool MusicPlayerClass::toggle() {
     }
     state = PLAYER_STATE_PLAYING;
     return true;
+}
+
+bool MusicPlayerClass::prev() {
+    return false;
+}
+
+bool MusicPlayerClass::next() {
+    return false;
 }
