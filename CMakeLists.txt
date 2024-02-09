@@ -41,5 +41,8 @@ add_executable(ssf
     src/Services/SettingsService.cpp
 )
 
-# Link libraries
-target_link_libraries(ssf SDL2 SDL2_ttf curl)
+# Directly set the path to the custom SDL2 library
+set(CUSTOM_SDL2_LIBRARY "${CMAKE_SOURCE_DIR}/SDL2/build/.libs/libSDL2-2.0.so.0.2800.5")
+
+# Link the custom SDL2 library
+target_link_libraries(ssf "${CUSTOM_SDL2_LIBRARY}" SDL2_ttf curl)
