@@ -225,6 +225,13 @@ double lerp(double start, double end, double t) {
 }
 
 void GUIClass::init() {
+#ifdef PRODUCTION // Seems to be working, needs to be tested on the device
+    if (setenv("SDL_VIDEODRIVER", "directfb", 1) != 0) {
+        std::cerr << "Failed to set SDL_VIDEODRIVER to dummy" << '\n';
+        exit(EXIT_FAILURE);
+    }
+#endif  // PRODUCTION
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << '\n';
         exit(EXIT_FAILURE);

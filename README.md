@@ -37,8 +37,8 @@ Compile SDL2 library to work with DirectFB:
 
 ```
     cd SDL2
-    ./configure --enable-video-directfb
-    make
+    ./configure --enable-video-directfb --disable-directfb-shared
+    sudo make install
     cd ..
 ```
 
